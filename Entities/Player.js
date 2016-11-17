@@ -7,7 +7,8 @@ const NONE = 'none';
 const MAX_VEL = 10;
 
 export default class Player {
-  constructor(scene) {
+  constructor(scene, viewport) {
+    this._viewport = viewport;
     this._xAccel = 0;
     this._xVel = 0;
     this._directionMoving = NONE;
@@ -15,7 +16,7 @@ export default class Player {
     // 1: Geometry
     // This defines the local shape of the object. In this case the geometry
     // will simply be a 1x1 plane facing the camera.
-    const geometry = new THREE.PlaneBufferGeometry(1, 1);
+    const geometry = new THREE.PlaneBufferGeometry(0.3, 0.3);
 
     // 2: Material
     // This defines how the surface of the shape is painted. In this case we
@@ -65,7 +66,7 @@ export default class Player {
   touch(gesture) {
     if (gesture.y0 < 64) {
       this._directionMoving = LEFT;
-    } else if (gesture.y0 > 300) {
+    } else if (gesture.y0 > this._viewport.screenHeight - 64) {
       this._directionMoving = RIGHT;
     }
   }

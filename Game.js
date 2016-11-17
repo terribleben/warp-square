@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 
 import Player from './Entities/Player';
+import Surface from './Entities/Surface';
 
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
@@ -38,6 +39,7 @@ export default class Game extends React.Component {
 
   _tick(dt) {
     this._player.tick(dt);
+    this._surface.tick(dt);
   }
 
   _touch(_, gesture) {
@@ -50,7 +52,8 @@ export default class Game extends React.Component {
 
   _prepareScene(scene) {
     this._scene = new THREE.Scene();
-    this._player = new Player(this._scene);
+    this._surface = new Surface(this._scene, this._viewport);
+    this._player = new Player(this._scene, this._viewport);
   }
 
   _prepareCamera() {
@@ -63,5 +66,11 @@ export default class Game extends React.Component {
       1, 10000,
     );
     this._camera.position.z = 1000;
+    this._viewport = {
+      width,
+      height,
+      screenWidth,
+      screenHeight,
+    };
   }
 };
