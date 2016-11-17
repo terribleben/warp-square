@@ -46,6 +46,11 @@ export default class Surface {
     for (let ii = 0; ii < this._platforms.length; ii++) {
       this._platforms[ii].tick(dt);
     }
+    // we can get away with this because the player will always traverse left-right without skipping any.
+    if (this._platforms.length && !this._platforms[0].isAlive()) {
+      this._platforms[0].destroy(this._scene);
+      this._platforms.shift();
+    }
   }
 
   // position in y dimension of screen
@@ -192,10 +197,9 @@ export default class Surface {
 
   _addPlatform() {
     let radius = this._viewport.width * (0.06 + Math.random() * 0.07);
-    let x = this._maxPlatformX + radius + (this._viewport.width * (0.05 + Math.random() * 0.15));
+    let x = this._maxPlatformX + radius + (this._viewport.width * (0.03 + Math.random() * 0.18));
     let platform = new Platform(this._getGame, this.getSurface.bind(this), this._scene, this._viewport, { x, radius });
     this._platforms.push(platform);
     this._maxPlatformX = platform.getPosition().x + platform.getRadius();
-    console.log('add platform', this._maxPlatformX);
   }
 };

@@ -6,8 +6,10 @@ export default class Platform {
     this._viewport = viewport;
     this._getSurface = getSurface;
     this._isCollided = false;
+    this._isDead = false;
+    this._sinkingOffset = 0;
     this._radius = (options.radius) ? options.radius : 0.3 + Math.random() * 0.3;
-    this._geometry = new THREE.PlaneGeometry(this._radius * 2.0, 0.1);
+    this._geometry = new THREE.PlaneGeometry(this._radius * 2.0, 0.15);
     this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd } ),
     this._mesh = new THREE.Mesh(this._geometry, this._material);
     this._mesh.position.z = -1;
@@ -23,6 +25,10 @@ export default class Platform {
     scene.add(this._mesh);
   }
 
+  destroy(scene) {
+    scene.remove(this._mesh);
+  }
+
   getRadius() {
     return this._radius;
   }
@@ -35,15 +41,26 @@ export default class Platform {
     return this._mesh.rotation.z;
   }
 
+  isAlive() {
+    return (!this._isDead || this._sinkingOffset < 0.2);
+  }
+
   setIsCollided(isCollided) {
+    if (this._isCollided && !isCollided) {
+      // we're no longer collided. fade away and die
+      this._isDead = true;
+    }
     this._isCollided = isCollided;
     this._material.color.setHex((isCollided) ? 0xff0000 : 0xdddddd);
   }
 
   tick(dt) {
+    if (this._isDead) {
+      this._sinkingOffset += 0.05 * dt;
+    }
     let yLeft = this._getSurface().getDepth(this._mesh.position.x + this._radius);
     let yRight = this._getSurface().getDepth(this._mesh.position.x - this._radius);
-    this._mesh.position.y = (yLeft + yRight) * 0.5;
+    this._mesh.position.y = ((yLeft + yRight) * 0.5) - this._sinkingOffset;
     this._mesh.rotation.z = -((yRight - yLeft) * this._radius * 2);
   }
 };
