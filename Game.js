@@ -85,8 +85,10 @@ export default class Game extends React.Component {
   }
 
   _updateCamera() {
-    this._camera.position.x = this._player.getPositionX();
+    // this._camera.position.x = this._player.getPositionX();
+    this._camera.left = this._player.getPositionX() - this._viewport.width * 0.5;
+    this._camera.right = this._player.getPositionX() + this._viewport.width * 0.5;
     this._camera.updateProjectionMatrix();
-    this._surface.cameraDidUpdate(this._camera.position.x);
+    this._surface.cameraDidUpdate(this._player.getPositionX());
   }
 };

@@ -3,10 +3,8 @@ const THREE = require('three');
 
 import Platform from './Platform';
 
-const SURFACE_NUM_SEGMENTS = 24;
+const SURFACE_NUM_SEGMENTS = 36;
 const SURFACE_NEUTRAL_DEPTH = -0.6;
-
-const NUM_PLATFORMS = 2;
 
 export default class Surface {
   constructor(getGame, scene, viewport) {
@@ -14,6 +12,9 @@ export default class Surface {
     this._collidedPlatform = null;
     this._segmentXOffset = 0;
     this._cameraXOffset = 0;
+    this._getGame = getGame;
+    this._maxPlatformX = this._viewport.width * -0.4;
+    this._scene = scene;
 
     this._depths = [];
     this._vDepth = [];
@@ -27,8 +28,9 @@ export default class Surface {
     scene.add(this._mesh);
 
     this._platforms = [];
-    this._platforms.push(new Platform(getGame, this.getSurface.bind(this), scene, this._viewport, { x: this._viewport.width * -0.25 }));
-    this._platforms.push(new Platform(getGame, this.getSurface.bind(this), scene, this._viewport, { x: this._viewport.width * 0.3 }));
+    for (let ii = 0; ii < 4; ii++) {
+      this._addPlatform();
+    }
   }
 
   getSurface() {
@@ -41,7 +43,7 @@ export default class Surface {
 
   tick(dt) {
     this._updateShape();
-    for (let ii = 0; ii < 2; ii++) {
+    for (let ii = 0; ii < this._platforms.length; ii++) {
       this._platforms[ii].tick(dt);
     }
   }
@@ -56,7 +58,7 @@ export default class Surface {
 
   impact(position, magnitude) {
     let isOnPlatform = false, leftIndex = 0, rightIndex = 0;
-    for (let ii = 0; ii < NUM_PLATFORMS; ii++) {
+    for (let ii = 0; ii < this._platforms.length; ii++) {
       let platform = this._platforms[ii];
       let xPosition = platform.getPosition().x, radius = platform.getRadius();
       if (position > xPosition - radius && position < xPosition + radius) {
@@ -86,7 +88,7 @@ export default class Surface {
   maybeCollideWithPlatform(position) {
     this._collidedPlatform = null;
 
-    for (let ii = 0; ii < NUM_PLATFORMS; ii++) {
+    for (let ii = 0; ii < this._platforms.length; ii++) {
       let platform = this._platforms[ii];
       let xPosition = platform.getPosition().x, radius = platform.getRadius();
       if (position > xPosition - radius && position < xPosition + radius) {
@@ -168,6 +170,10 @@ export default class Surface {
     }
     this._segmentXOffset = delta;
     this._cameraXOffset = cameraXOffset;
+
+    if (this._cameraXOffset > this._maxPlatformX - this._viewport.width * 0.5) {
+      this._addPlatform();
+    }
   }
 
   _shiftSegmentsLeft() {
@@ -185,6 +191,11 @@ export default class Surface {
   }
 
   _addPlatform() {
-
+    let radius = this._viewport.width * (0.06 + Math.random() * 0.07);
+    let x = this._maxPlatformX + radius + (this._viewport.width * (0.05 + Math.random() * 0.15));
+    let platform = new Platform(this._getGame, this.getSurface.bind(this), this._scene, this._viewport, { x, radius });
+    this._platforms.push(platform);
+    this._maxPlatformX = platform.getPosition().x + platform.getRadius();
+    console.log('add platform', this._maxPlatformX);
   }
 };

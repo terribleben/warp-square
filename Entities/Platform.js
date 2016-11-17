@@ -5,9 +5,8 @@ export default class Platform {
   constructor(getGame, getSurface, scene, viewport, options = {}) {
     this._viewport = viewport;
     this._getSurface = getSurface;
-    this._radius = 0.3 + Math.random() * 0.3;
     this._isCollided = false;
-
+    this._radius = (options.radius) ? options.radius : 0.3 + Math.random() * 0.3;
     this._geometry = new THREE.PlaneGeometry(this._radius * 2.0, 0.1);
     this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd } ),
     this._mesh = new THREE.Mesh(this._geometry, this._material);

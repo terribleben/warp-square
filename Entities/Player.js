@@ -1,9 +1,9 @@
 
 const THREE = require('three');
 
-const MAX_ACCEL = 36;
-const MAX_VEL = 2;
-const MAX_JUMP_VEL = 7;
+const MAX_ACCEL = 32;
+const MAX_VEL = 1.8;
+const MAX_JUMP_VEL = 6;
 
 export default class Player {
   constructor(scene, viewport, surface) {
@@ -18,7 +18,7 @@ export default class Player {
     this._isJumping = false;
     this._surface = surface;
 
-    const geometry = new THREE.PlaneBufferGeometry(0.15, 0.15);
+    const geometry = new THREE.PlaneBufferGeometry(0.12, 0.12);
     this._material = new THREE.MeshBasicMaterial( { color: 0xffffff } ),
 
     this._mesh = new THREE.Mesh(geometry, this._material);
