@@ -1,11 +1,13 @@
 
 const THREE = require('three');
 
+import Platform from './Platform';
+
 const SURFACE_NUM_SEGMENTS = 24;
 const SURFACE_NEUTRAL_DEPTH = -0.6;
 
 export default class Surface {
-  constructor(scene, viewport) {
+  constructor(getGame, scene, viewport) {
     this._viewport = viewport;
 
     this._depths = [];
@@ -18,10 +20,21 @@ export default class Surface {
     this._material = new THREE.MeshBasicMaterial( { color: 0x555555 } ),
     this._mesh = new THREE.Mesh(this._getShapeGeometry(), this._material);
     scene.add(this._mesh);
+
+    this._platforms = [];
+    this._platforms.push(new Platform(getGame, this.getSurface.bind(this), scene, this._viewport, { x: this._viewport.width * -0.25 }));
+    this._platforms.push(new Platform(getGame, this.getSurface.bind(this), scene, this._viewport, { x: this._viewport.width * 0.3 }));
+  }
+
+  getSurface() {
+    return this;
   }
 
   tick(dt) {
     this._mesh.geometry = this._getShapeGeometry();
+    for (let ii = 0; ii < 2; ii++) {
+      this._platforms[ii].tick(dt);
+    }
   }
 
   // position in y dimension of screen
