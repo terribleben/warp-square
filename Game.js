@@ -43,6 +43,7 @@ export default class Game extends React.Component {
   }
 
   _tick(dt) {
+    this._updateCamera();
     this._player.tick(dt);
     this._surface.tick(dt);
   }
@@ -81,5 +82,11 @@ export default class Game extends React.Component {
       screenWidth,
       screenHeight,
     };
+  }
+
+  _updateCamera() {
+    this._camera.position.x = this._player.getPositionX();
+    this._camera.updateProjectionMatrix();
+    this._surface.cameraDidUpdate(this._camera.position.x);
   }
 };

@@ -12,6 +12,8 @@ export default class Surface {
   constructor(getGame, scene, viewport) {
     this._viewport = viewport;
     this._collidedPlatform = null;
+    this._segmentXOffset = 0;
+    this._cameraXOffset = 0;
 
     this._depths = [];
     this._vDepth = [];
@@ -96,8 +98,8 @@ export default class Surface {
     }
   }
 
-  _scaledPosition(screenPosition) {
-    position = ((screenPosition + this._viewport.width * 0.5) / this._viewport.width);
+  _scaledPosition(worldXPosition) {
+    position = ((worldXPosition - this._cameraXOffset + this._viewport.width * 0.5) / this._viewport.width);
     let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
     let leftIndex = Math.floor(scaledPosition);
     let rightIndex = Math.ceil(scaledPosition);
@@ -123,6 +125,7 @@ export default class Surface {
   }
 
   _updateShape() {
+    let width = this._viewport.width;
     for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
       // TODO: kill me
       if (Math.random() < 0.005) {
@@ -138,9 +141,45 @@ export default class Surface {
     let vertices = this._mesh.geometry.vertices;
 
     // modify in place
+    let leftBound = -(this._viewport.width / 2) + this._cameraXOffset;
+    vertices[0].x = leftBound;
     for (let vertexIdx = 1, ii = 0; ii < SURFACE_NUM_SEGMENTS; vertexIdx++, ii++) {
+      let xInterp = ii / (SURFACE_NUM_SEGMENTS - 1.0);
       vertices[vertexIdx].y = SURFACE_NEUTRAL_DEPTH + this._depths[ii];
+      vertices[vertexIdx].x = leftBound + (xInterp * width);// - this._segmentXOffset;
     }
+    vertices[vertices.length - 1].x = leftBound + this._viewport.width;
     this._mesh.geometry.verticesNeedUpdate = true;
+  }
+
+  cameraDidUpdate(cameraXOffset) {
+    let segmentWidth = this._viewport.width / (SURFACE_NUM_SEGMENTS - 1.0);
+    // recycle left segments, generate right segments
+    let delta = cameraXOffset - this._cameraXOffset;
+    while (delta > segmentWidth) {
+      this._shiftSegmentsLeft();
+      delta -= segmentWidth;
+    }
+    // recycle right segments, generate left segments
+    while (delta < -segmentWidth) {
+      this._shiftSegmentsRight();
+      delta += segmentWidth;
+    }
+    this._segmentXOffset = delta;
+    this._cameraXOffset = cameraXOffset;
+  }
+
+  _shiftSegmentsLeft() {
+    let leftDepth = this._depths.shift();
+    this._depths.push(leftDepth);
+    let leftVel = this._vDepth.shift();
+    this._vDepth.push(leftVel);
+  }
+
+  _shiftSegmentsRight() {
+    let rightDepth = this._depths.pop();
+    this._depths.unshift(rightDepth);
+    let rightVel = this._vDepth.pop();
+    this._vDepth.unshift(rightVel);
   }
 };

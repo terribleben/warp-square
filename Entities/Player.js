@@ -26,6 +26,10 @@ export default class Player {
     scene.add(this._mesh);
   }
 
+  getPositionX() {
+    return this._mesh.position.x;
+  }
+
   tick(dt) {
     let viewportHalfWidth = this._viewport.width / 2;
 
@@ -49,10 +53,6 @@ export default class Player {
     this._mesh.position.x += (this._xVel * dt);
     if (this._mesh.position.x < -viewportHalfWidth) {
       this._mesh.position.x = -viewportHalfWidth;
-      this._xVel = 0;
-    }
-    if (this._mesh.position.x > viewportHalfWidth) {
-      this._mesh.position.x = viewportHalfWidth;
       this._xVel = 0;
     }
 
