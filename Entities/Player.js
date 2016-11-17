@@ -2,7 +2,7 @@
 const THREE = require('three');
 
 const MAX_ACCEL = 36;
-const MAX_VEL = 1.5;
+const MAX_VEL = 2;
 const MAX_JUMP_VEL = 7;
 
 export default class Player {
@@ -50,6 +50,10 @@ export default class Player {
     let viewportHalfWidth = this._viewport.width / 2;
 
     if (this._touchIdentifier) {
+      // switch direction faster
+      if (Math.sign(this._xVel) !== Math.sign(this._xAccel)) {
+        this._xVel *= 0.97;
+      }
       this._xVel += this._xAccel * dt;
       if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
       if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
@@ -71,7 +75,7 @@ export default class Player {
 
     let surfaceBelow = this._surface.getDepth(this._mesh.position.x) + 0.05;
     if (this._isJumping) {
-      this._yVel -= 0.4;
+      this._yVel -= 0.5;
       this._mesh.position.y += (this._yVel * dt);
       if (this._mesh.position.y <= surfaceBelow && this._yVel <= 0) {
         this._surface.impact(this._mesh.position.x, this._yVel * 0.02);
@@ -94,7 +98,7 @@ export default class Player {
         this._previousTouchPosition = this._initialTouchPosition;
       } else if (firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
-        this._xAccel = (currentTouchPosition.x - this._initialTouchPosition.x) * 0.5;
+        this._xAccel = (currentTouchPosition.x - this._initialTouchPosition.x) * 0.3;
         this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
         this._previousTouchPosition = currentTouchPosition;
       }
@@ -109,7 +113,7 @@ export default class Player {
         let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
         if (!this._isJumping && deltaY < -24) {
           this._isJumping = true;
-          this._yVel = MAX_JUMP_VEL * Math.min(1.0, ((deltaY + 24.0) / -96.0));
+          this._yVel = MAX_JUMP_VEL * Math.min(1.0, ((deltaY + 24.0) / -128.0)) * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL));
         }
       }
     }
