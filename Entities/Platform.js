@@ -26,8 +26,12 @@ export default class Platform {
     return this._radius;
   }
 
-  getXPosition() {
-    return this._mesh.position.x;
+  getPosition() {
+    return this._mesh.position;
+  }
+
+  getRotation() {
+    return this._mesh.rotation.z;
   }
 
   setIsCollided(isCollided) {

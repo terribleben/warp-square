@@ -53,9 +53,32 @@ export default class Surface {
   }
 
   impact(position, magnitude) {
-    let { scaledPosition, leftIndex, rightIndex, interp } = this._scaledPosition(position);
-    this._depths[leftIndex] += magnitude * (1.0 - interp);
-    this._depths[rightIndex] += magnitude * interp;
+    let isOnPlatform = false, leftIndex = 0, rightIndex = 0;
+    for (let ii = 0; ii < NUM_PLATFORMS; ii++) {
+      let platform = this._platforms[ii];
+      let xPosition = platform.getPosition().x, radius = platform.getRadius();
+      if (position > xPosition - radius && position < xPosition + radius) {
+        isOnPlatform = true;
+        leftIndex = this._scaledPosition(xPosition - radius).leftIndex;
+        rightIndex = this._scaledPosition(xPosition + radius).rightIndex;
+        break;
+      }
+    }
+
+    if (isOnPlatform) {
+      // it's on a platform, impact everything from leftindex to rightindex
+      for (let ii = leftIndex; ii <= rightIndex; ii++) {
+        this._depths[ii] += magnitude * 0.5;
+      }
+      let scaledPosition = this._scaledPosition(position);
+      this._depths[scaledPosition.leftIndex] += magnitude * (1.0 - scaledPosition.interp);
+      this._depths[scaledPosition.rightIndex] += magnitude * (scaledPosition.interp);
+    } else {
+      // it's just in the water somewhere
+      let { leftIndex, rightIndex, interp } = this._scaledPosition(position);
+      this._depths[leftIndex] += magnitude * (1.0 - interp);
+      this._depths[rightIndex] += magnitude * interp;
+    }
   }
 
   maybeCollideWithPlatform(position) {
@@ -63,8 +86,7 @@ export default class Surface {
 
     for (let ii = 0; ii < NUM_PLATFORMS; ii++) {
       let platform = this._platforms[ii];
-      let xPosition = platform.getXPosition(), radius = platform.getRadius();
-      console.log('is collided? (position, platform, radius)', position, xPosition, radius);
+      let xPosition = platform.getPosition().x, radius = platform.getRadius();
       if (position > xPosition - radius && position < xPosition + radius) {
         this._collidedPlatform = platform;
         platform.setIsCollided(true);

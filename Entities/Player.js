@@ -72,8 +72,16 @@ export default class Player {
   }
 
   _stickToSurface(surfaceY) {
-    this._mesh.position.y = surfaceY;
     this._surface.maybeCollideWithPlatform(this._mesh.position.x);
+    let platform = this._surface.getCollidedPlatform();
+    if (platform) {
+      let platformPosition = platform.getPosition();
+      let platformRotation = platform.getRotation();
+      let deltaX = this._mesh.position.x - platformPosition.x;
+      this._mesh.position.y = platformPosition.y + Math.sin(platformRotation) * deltaX + 0.1;
+    } else {
+      this._mesh.position.y = surfaceY;
+    }
   }
 
   touch(touches, gesture) {
