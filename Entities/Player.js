@@ -2,8 +2,8 @@
 const THREE = require('three');
 
 const MAX_ACCEL = 36;
-const MAX_VEL = 3;
-const JUMP_VEL = 8;
+const MAX_VEL = 1.5;
+const MAX_JUMP_VEL = 7;
 
 export default class Player {
   constructor(scene, viewport, surface) {
@@ -13,6 +13,7 @@ export default class Player {
     this._yVel = 0;
     this._touchIdentifier = null;
     this._initialTouchPosition = { x: 0, y: 0 };
+    this._previousTouchPosition = { x: 0, y: 0 };
     this._isJumping = false;
     this._surface = surface;
 
@@ -55,7 +56,7 @@ export default class Player {
     } else {
       this._xAccel = 0;
       if (!this._isJumping) {
-        this._xVel *= 0.92;
+        this._xVel *= 0.9;
       }
     }
     this._mesh.position.x += (this._xVel * dt);
@@ -90,20 +91,29 @@ export default class Player {
         this._touchIdentifier = firstTouch.identifier;
         // for press and release, can also use gesture.x0 and y0
         this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+        this._previousTouchPosition = this._initialTouchPosition;
       } else if (firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
         this._xAccel = (currentTouchPosition.x - this._initialTouchPosition.x) * 0.5;
         this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
-        if (!this._isJumping && currentTouchPosition.y - this._initialTouchPosition.y < -48) {
+        this._previousTouchPosition = currentTouchPosition;
+      }
+    }
+  }
+
+  release(touches, gesture) {
+    if (touches && touches.length) {
+      let firstTouch = touches[0];
+      if (this._touchIdentifier && firstTouch.identifier == this._touchIdentifier) {
+        let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+        let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
+        if (!this._isJumping && deltaY < -24) {
           this._isJumping = true;
-          this._yVel = JUMP_VEL;
+          this._yVel = MAX_JUMP_VEL * Math.min(1.0, ((deltaY + 24.0) / -96.0));
         }
       }
     }
-
-  }
-
-  release(gesture) {
     this._touchIdentifier = null;
+    this._previousTouchPosition = { x: 0, y: 0 };
   }
 };

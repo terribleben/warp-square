@@ -53,8 +53,10 @@ export default class Game extends React.Component {
     this._player.touch(touches, gesture);
   };
 
-  _release(_, gesture) {
-    this._player.release(gesture);
+  _release(event, gesture) {
+    let { nativeEvent } = event;
+    let touches = nativeEvent ? nativeEvent.changedTouches : null;
+    this._player.release(touches, gesture);
   }
 
   _prepareScene(scene) {
