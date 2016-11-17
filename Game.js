@@ -23,6 +23,7 @@ export default class Game extends React.Component {
     const panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: this._touch.bind(this),
+      onPanResponderMove: this._touch.bind(this),
       onPanResponderRelease: this._release.bind(this),
       onPanResponderTerminate: this._release.bind(this),
       onShouldBlockNativeResponder: () => false,
@@ -46,8 +47,10 @@ export default class Game extends React.Component {
     }
   }
 
-  _touch(_, gesture) {
-    this._player.touch(gesture);
+  _touch(event, gesture) {
+    let { nativeEvent } = event;
+    let touches = nativeEvent ? nativeEvent.touches : null;
+    this._player.touch(touches, gesture);
   };
 
   _release(_, gesture) {

@@ -1,10 +1,8 @@
 
 const THREE = require('three');
 
-const LEFT = 'left';
-const RIGHT = 'right';
-const NONE = 'none';
-const MAX_VEL = 6;
+const MAX_ACCEL = 36;
+const MAX_VEL = 3;
 const JUMP_VEL = 8;
 
 export default class Player {
@@ -13,7 +11,8 @@ export default class Player {
     this._xAccel = 0;
     this._xVel = 0;
     this._yVel = 0;
-    this._directionMoving = NONE;
+    this._touchIdentifier = null;
+    this._initialTouchPosition = { x: 0, y: 0 };
     this._isJumping = false;
     this._surface = surface;
 
@@ -49,16 +48,15 @@ export default class Player {
   tick(dt) {
     let viewportHalfWidth = this._viewport.width / 2;
 
-    if (this._directionMoving == NONE) {
+    if (this._touchIdentifier) {
+      this._xVel += this._xAccel * dt;
+      if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
+      if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
+    } else {
       this._xAccel = 0;
       if (!this._isJumping) {
         this._xVel *= 0.92;
       }
-    } else {
-      this._xAccel = (this._directionMoving == LEFT) ? -32 : 32;
-      this._xVel += this._xAccel * dt;
-      if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
-      if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
     }
     this._mesh.position.x += (this._xVel * dt);
     if (this._mesh.position.x < -viewportHalfWidth) {
@@ -85,18 +83,27 @@ export default class Player {
     }
   }
 
-  touch(gesture) {
-    if (gesture.x0 < 64) {
-      this._directionMoving = LEFT;
-    } else if (gesture.x0 > this._viewport.screenWidth - 64) {
-      this._directionMoving = RIGHT;
-    } else if (!this._isJumping) {
-      this._isJumping = true;
-      this._yVel = JUMP_VEL;
+  touch(touches, gesture) {
+    if (touches && touches.length) {
+      let firstTouch = touches[0];
+      if (!this._touchIdentifier) {
+        this._touchIdentifier = firstTouch.identifier;
+        // for press and release, can also use gesture.x0 and y0
+        this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+      } else if (firstTouch.identifier == this._touchIdentifier) {
+        let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+        this._xAccel = (currentTouchPosition.x - this._initialTouchPosition.x) * 0.5;
+        this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
+        if (!this._isJumping && currentTouchPosition.y - this._initialTouchPosition.y < -48) {
+          this._isJumping = true;
+          this._yVel = JUMP_VEL;
+        }
+      }
     }
+
   }
 
   release(gesture) {
-    this._directionMoving = NONE;
+    this._touchIdentifier = null;
   }
 };
