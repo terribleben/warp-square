@@ -5,22 +5,16 @@ import {
   PanResponder
 } from 'react-native';
 
+import Player from './Entities/Player';
+
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
 
 export default class Game extends React.Component {
   constructor(props, context) {
     super(props, context);
-    const width = 4;
-    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-    const height = (screenHeight / screenWidth) * width;
-    this._camera = new THREE.OrthographicCamera(
-      -width / 2, width / 2,
-      height / 2, -height / 2,
-      1, 10000,
-    );
-    this._camera.position.z = 1000;
-    this._scene = new THREE.Scene();
+    this._prepareCamera();
+    this._prepareScene();
   }
 
   render() {
@@ -43,14 +37,31 @@ export default class Game extends React.Component {
   }
 
   _tick(dt) {
-
+    this._player.tick(dt);
   }
 
   _touch(_, gesture) {
-
+    this._player.touch(gesture);
   };
 
   _release(_, gesture) {
+    this._player.release(gesture);
+  }
 
+  _prepareScene(scene) {
+    this._scene = new THREE.Scene();
+    this._player = new Player(this._scene);
+  }
+
+  _prepareCamera() {
+    const width = 4;
+    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const height = (screenHeight / screenWidth) * width;
+    this._camera = new THREE.OrthographicCamera(
+      -width / 2, width / 2,
+      height / 2, -height / 2,
+      1, 10000,
+    );
+    this._camera.position.z = 1000;
   }
 };
