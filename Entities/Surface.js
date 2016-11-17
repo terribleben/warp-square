@@ -55,7 +55,7 @@ export default class Surface {
       }
       let left = (ii > 0) ? this._depths[ii - 1] : 0.0;
       let right = (ii < SURFACE_NUM_SEGMENTS - 1) ? this._depths[ii + 1] : 0.0;
-      let aDepth = -this._depths[ii] * 0.03 + (left * 0.006) + (right * 0.006);
+      let aDepth = -this._depths[ii] * 0.02 + (left * 0.006) + (right * 0.006);
       this._vDepth[ii] += aDepth;
       this._depths[ii] += this._vDepth[ii];
       this._vDepth[ii] *= 0.98;

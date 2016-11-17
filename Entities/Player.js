@@ -4,14 +4,17 @@ const THREE = require('three');
 const LEFT = 'left';
 const RIGHT = 'right';
 const NONE = 'none';
-const MAX_VEL = 10;
+const MAX_VEL = 6;
+const JUMP_VEL = 10;
 
 export default class Player {
   constructor(scene, viewport, surface) {
     this._viewport = viewport;
     this._xAccel = 0;
     this._xVel = 0;
+    this._yVel = 0;
     this._directionMoving = NONE;
+    this._isJumping = false;
     this._surface = surface;
 
     // 1: Geometry
@@ -44,9 +47,13 @@ export default class Player {
   }
 
   tick(dt) {
+    let viewportHalfHeight = this._viewport.height / 2;
+
     if (this._directionMoving == NONE) {
       this._xAccel = 0;
-      this._xVel *= 0.98;
+      if (!this._isJumping) {
+        this._xVel *= 0.92;
+      }
     } else {
       this._xAccel = (this._directionMoving == LEFT) ? 32 : -32;
       this._xVel += this._xAccel * dt;
@@ -54,15 +61,28 @@ export default class Player {
       if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
     }
     this._mesh.position.y += (this._xVel * dt);
-    if (this._mesh.position.y < -2.5) {
-      this._mesh.position.y = -2.5;
+    if (this._mesh.position.y < -viewportHalfHeight) {
+      this._mesh.position.y = -viewportHalfHeight;
       this._xVel = 0;
     }
-    if (this._mesh.position.y > 2.5) {
-      this._mesh.position.y = 2.5;
+    if (this._mesh.position.y > viewportHalfHeight) {
+      this._mesh.position.y = viewportHalfHeight;
       this._xVel = 0;
     }
-    this._mesh.position.x = this._surface.getDepth(this._mesh.position.y) + 0.1;
+
+    let surfaceBelow = this._surface.getDepth(this._mesh.position.y) + 0.1;
+    if (this._isJumping) {
+      this._yVel -= 0.3;
+      this._mesh.position.x += (this._yVel * dt);
+      if (this._mesh.position.x <= surfaceBelow && this._yVel <= 0) {
+        this._surface.impact(this._mesh.position.y, this._yVel * 0.3);
+        this._isJumping = false;
+        this._yVel = 0;
+        this._mesh.position.x = surfaceBelow;
+      }
+    } else {
+      this._mesh.position.x = surfaceBelow;
+    }
   }
 
   touch(gesture) {
@@ -70,6 +90,9 @@ export default class Player {
       this._directionMoving = LEFT;
     } else if (gesture.y0 > this._viewport.screenHeight - 64) {
       this._directionMoving = RIGHT;
+    } else if (!this._isJumping) {
+      this._isJumping = true;
+      this._yVel = JUMP_VEL;
     }
   }
 
