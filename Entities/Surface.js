@@ -2,15 +2,17 @@
 const THREE = require('three');
 
 const SURFACE_NUM_SEGMENTS = 24;
-const SURFACE_NEUTRAL_DEPTH = -0.1;
+const SURFACE_NEUTRAL_DEPTH = -0.9;
 
 export default class Surface {
   constructor(scene, viewport) {
     this._viewport = viewport;
 
     this._depths = [];
+    this._vDepth = [];
     for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
       this._depths.push(-0.09 + Math.random() * 0.18);
+      this._vDepth.push(0);
     }
 
     this._material = new THREE.MeshBasicMaterial( { color: 0x555555 } ),
@@ -24,17 +26,40 @@ export default class Surface {
 
   // position in y dimension of screen
   getDepth(position) {
-    position = 1.0 - ((position + this._viewport.height * 0.5) / this._viewport.height);
-    let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
-    let leftIndex = Math.floor(scaledPosition);
-    let rightIndex = Math.ceil(scaledPosition);
-    let interp = scaledPosition - leftIndex;
+    let { scaledPosition, leftIndex, rightIndex, interp } = this._scaledPosition(position);
     return SURFACE_NEUTRAL_DEPTH +
       (this._depths[leftIndex] * (1.0 - interp)) +
       (this._depths[rightIndex] * interp);
   }
 
+  impact(position, magnitude) {
+    let { scaledPosition, leftIndex, rightIndex, interp } = this._scaledPosition(position);
+    this._depths[leftIndex] += magnitude * (1.0 - interp);
+    this._depths[rightIndex] += magnitude * interp;
+  }
+
+  _scaledPosition(screenPosition) {
+    position = 1.0 - ((screenPosition + this._viewport.height * 0.5) / this._viewport.height);
+    let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
+    let leftIndex = Math.floor(scaledPosition);
+    let rightIndex = Math.ceil(scaledPosition);
+    let interp = scaledPosition - leftIndex;
+    return { scaledPosition, leftIndex, rightIndex, interp };
+  }
+
   _getShapeGeometry() {
+    for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
+      // TODO: kill me
+      if (Math.random() < 0.005) {
+        this._vDepth[ii] = -0.01 + Math.random() * 0.02;
+      }
+      let left = (ii > 0) ? this._depths[ii - 1] : 0.0;
+      let right = (ii < SURFACE_NUM_SEGMENTS - 1) ? this._depths[ii + 1] : 0.0;
+      let aDepth = -this._depths[ii] * 0.03 + (left * 0.006) + (right * 0.006);
+      this._vDepth[ii] += aDepth;
+      this._depths[ii] += this._vDepth[ii];
+      this._vDepth[ii] *= 0.98;
+    }
     let width = this._viewport.height;
     let shape = new THREE.Shape();
     shape.moveTo(-this._viewport.width / 2, this._viewport.height / 2);
