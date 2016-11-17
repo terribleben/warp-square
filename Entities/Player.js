@@ -18,32 +18,11 @@ export default class Player {
     this._isJumping = false;
     this._surface = surface;
 
-    // 1: Geometry
-    // This defines the local shape of the object. In this case the geometry
-    // will simply be a 1x1 plane facing the camera.
     const geometry = new THREE.PlaneBufferGeometry(0.15, 0.15);
-
-    // 2: Material
-    // This defines how the surface of the shape is painted. In this case we
-    // want to paint a texture loaded from an asset and also tint it.
-    // Nearest-neighbor filtering with `THREE.NearestFilter` is nice for
-    // pixel art styles.
-    /* const texture = THREEView.textureFromAsset(Assets['player-sprite']);
-    texture.minFilter = texture.magFilter = THREE.NearestFilter;
-    texture.needsUpdate = true;
-    this._material = new THREE.MeshBasicMaterial({
-      map: texture,
-      color: 0xff0000,    // Sprites can be tinted with a color.
-      transparent: true,  // Use the image's alpha channel for alpha.
-    }); */
     this._material = new THREE.MeshBasicMaterial( { color: 0xffffff } ),
 
-    // 3: Mesh
-    // A mesh is a node in THREE's scenegraph and refers to a geometry and a
-    // material to draw itself. It can be translated and rotated as any other
-    // scenegraph node.
     this._mesh = new THREE.Mesh(geometry, this._material);
-    this._mesh.position.z = -1;
+    this._mesh.position.z = -10;
     scene.add(this._mesh);
   }
 
@@ -85,11 +64,16 @@ export default class Player {
         this._surface.impact(this._mesh.position.x, this._yVel * 0.02);
         this._isJumping = false;
         this._yVel = 0;
-        this._mesh.position.y = surfaceBelow;
+        this._stickToSurface(surfaceBelow);
       }
     } else {
-      this._mesh.position.y = surfaceBelow;
+      this._stickToSurface(surfaceBelow);
     }
+  }
+
+  _stickToSurface(surfaceY) {
+    this._mesh.position.y = surfaceY;
+    this._surface.maybeCollideWithPlatform(this._mesh.position.x);
   }
 
   touch(touches, gesture) {

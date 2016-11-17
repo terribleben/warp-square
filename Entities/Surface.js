@@ -6,9 +6,12 @@ import Platform from './Platform';
 const SURFACE_NUM_SEGMENTS = 24;
 const SURFACE_NEUTRAL_DEPTH = -0.6;
 
+const NUM_PLATFORMS = 2;
+
 export default class Surface {
   constructor(getGame, scene, viewport) {
     this._viewport = viewport;
+    this._collidedPlatform = null;
 
     this._depths = [];
     this._vDepth = [];
@@ -30,6 +33,10 @@ export default class Surface {
     return this;
   }
 
+  getCollidedPlatform() {
+    return this._collidedPlatform;
+  }
+
   tick(dt) {
     this._mesh.geometry = this._getShapeGeometry();
     for (let ii = 0; ii < 2; ii++) {
@@ -49,6 +56,22 @@ export default class Surface {
     let { scaledPosition, leftIndex, rightIndex, interp } = this._scaledPosition(position);
     this._depths[leftIndex] += magnitude * (1.0 - interp);
     this._depths[rightIndex] += magnitude * interp;
+  }
+
+  maybeCollideWithPlatform(position) {
+    this._collidedPlatform = null;
+
+    for (let ii = 0; ii < NUM_PLATFORMS; ii++) {
+      let platform = this._platforms[ii];
+      let xPosition = platform.getXPosition(), radius = platform.getRadius();
+      console.log('is collided? (position, platform, radius)', position, xPosition, radius);
+      if (position > xPosition - radius && position < xPosition + radius) {
+        this._collidedPlatform = platform;
+        platform.setIsCollided(true);
+      } else {
+        platform.setIsCollided(false);
+      }
+    }
   }
 
   _scaledPosition(screenPosition) {
