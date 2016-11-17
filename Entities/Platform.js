@@ -2,7 +2,7 @@
 const THREE = require('three');
 
 export default class Platform {
-  constructor(scene, viewport, surface) {
+  constructor(scene, viewport, surface, options = {}) {
     this._viewport = viewport;
     this._surface = surface;
     this._radius = 0.3 + Math.random() * 0.3;
@@ -13,7 +13,11 @@ export default class Platform {
 
     this._mesh = new THREE.Mesh(geometry, this._material);
     this._mesh.position.z = -1;
-    this._mesh.position.x = (-0.4 + Math.random() * 0.8) * viewport.width;
+    if (options.x) {
+      this._mesh.position.x = options.x;
+    } else {
+      this._mesh.position.x = (-0.4 + Math.random() * 0.8) * viewport.width;
+    }
     scene.add(this._mesh);
   }
 

@@ -14,6 +14,7 @@ export default class Player {
     this._touchIdentifier = null;
     this._initialTouchPosition = { x: 0, y: 0 };
     this._previousTouchPosition = { x: 0, y: 0 };
+    this._touchDeltaX = 0;
     this._isJumping = false;
     this._surface = surface;
 
@@ -50,13 +51,16 @@ export default class Player {
     let viewportHalfWidth = this._viewport.width / 2;
 
     if (this._touchIdentifier) {
+      this._xAccel = this._touchDeltaX * 0.5;
+      this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
+      let maxXVel = MAX_VEL * Math.min(1.0, (Math.abs(this._touchDeltaX) / 48.0));
       // switch direction faster
       if (Math.sign(this._xVel) !== Math.sign(this._xAccel)) {
         this._xVel *= 0.97;
       }
       this._xVel += this._xAccel * dt;
-      if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
-      if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
+      if (this._xVel < -maxXVel) this._xVel = -maxXVel;
+      if (this._xVel > maxXVel) this._xVel = maxXVel;
     } else {
       this._xAccel = 0;
       if (!this._isJumping) {
@@ -93,13 +97,11 @@ export default class Player {
       let firstTouch = touches[0];
       if (!this._touchIdentifier) {
         this._touchIdentifier = firstTouch.identifier;
-        // for press and release, can also use gesture.x0 and y0
         this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
         this._previousTouchPosition = this._initialTouchPosition;
       } else if (firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
-        this._xAccel = (currentTouchPosition.x - this._initialTouchPosition.x) * 0.3;
-        this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
+        this._touchDeltaX = currentTouchPosition.x - this._initialTouchPosition.x;
         this._previousTouchPosition = currentTouchPosition;
       }
     }
@@ -118,6 +120,7 @@ export default class Player {
       }
     }
     this._touchIdentifier = null;
+    this._touchDeltaX = 0;
     this._previousTouchPosition = { x: 0, y: 0 };
   }
 };

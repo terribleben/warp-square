@@ -64,9 +64,11 @@ export default class Game extends React.Component {
     this._surface = new Surface(this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
     this._platforms = [];
-    for (let ii = 0; ii < 2; ii++) {
+    /* for (let ii = 0; ii < 2; ii++) {
       this._platforms.push(new Platform(this._scene, this._viewport, this._surface));
-    }
+    } */
+    this._platforms.push(new Platform(this._scene, this._viewport, this._surface, { x: this._viewport.width * -0.25 }));
+    this._platforms.push(new Platform(this._scene, this._viewport, this._surface, { x: this._viewport.width * 0.3 }));
   }
 
   _prepareCamera() {
