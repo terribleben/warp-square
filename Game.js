@@ -53,7 +53,7 @@ export default class Game extends React.Component {
   _prepareScene(scene) {
     this._scene = new THREE.Scene();
     this._surface = new Surface(this._scene, this._viewport);
-    this._player = new Player(this._scene, this._viewport);
+    this._player = new Player(this._scene, this._viewport, this._surface);
   }
 
   _prepareCamera() {

@@ -7,11 +7,12 @@ const NONE = 'none';
 const MAX_VEL = 10;
 
 export default class Player {
-  constructor(scene, viewport) {
+  constructor(scene, viewport, surface) {
     this._viewport = viewport;
     this._xAccel = 0;
     this._xVel = 0;
     this._directionMoving = NONE;
+    this._surface = surface;
 
     // 1: Geometry
     // This defines the local shape of the object. In this case the geometry
@@ -61,6 +62,7 @@ export default class Player {
       this._mesh.position.y = 2.5;
       this._xVel = 0;
     }
+    this._mesh.position.x = this._surface.getDepth(this._mesh.position.y) + 0.1;
   }
 
   touch(gesture) {

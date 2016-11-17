@@ -2,7 +2,7 @@
 const THREE = require('three');
 
 const SURFACE_NUM_SEGMENTS = 24;
-const SURFACE_NEUTRAL_DEPTH = 0;
+const SURFACE_NEUTRAL_DEPTH = -0.1;
 
 export default class Surface {
   constructor(scene, viewport) {
@@ -19,7 +19,19 @@ export default class Surface {
   }
 
   tick(dt) {
-    // this._mesh.geometry = this._getShapeGeometry();
+    this._mesh.geometry = this._getShapeGeometry();
+  }
+
+  // position in y dimension of screen
+  getDepth(position) {
+    position = 1.0 - ((position + this._viewport.height * 0.5) / this._viewport.height);
+    let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
+    let leftIndex = Math.floor(scaledPosition);
+    let rightIndex = Math.ceil(scaledPosition);
+    let interp = scaledPosition - leftIndex;
+    return SURFACE_NEUTRAL_DEPTH +
+      (this._depths[leftIndex] * (1.0 - interp)) +
+      (this._depths[rightIndex] * interp);
   }
 
   _getShapeGeometry() {
