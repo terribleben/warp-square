@@ -5,7 +5,7 @@ const LEFT = 'left';
 const RIGHT = 'right';
 const NONE = 'none';
 const MAX_VEL = 6;
-const JUMP_VEL = 10;
+const JUMP_VEL = 8;
 
 export default class Player {
   constructor(scene, viewport, surface) {
@@ -72,10 +72,10 @@ export default class Player {
 
     let surfaceBelow = this._surface.getDepth(this._mesh.position.y) + 0.1;
     if (this._isJumping) {
-      this._yVel -= 0.3;
+      this._yVel -= 0.4;
       this._mesh.position.x += (this._yVel * dt);
       if (this._mesh.position.x <= surfaceBelow && this._yVel <= 0) {
-        this._surface.impact(this._mesh.position.y, this._yVel * 0.3);
+        this._surface.impact(this._mesh.position.y, this._yVel * 0.03);
         this._isJumping = false;
         this._yVel = 0;
         this._mesh.position.x = surfaceBelow;

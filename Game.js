@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 
 import Player from './Entities/Player';
+import Platform from './Entities/Platform';
 import Surface from './Entities/Surface';
 
 const THREE = require('three');
@@ -40,6 +41,9 @@ export default class Game extends React.Component {
   _tick(dt) {
     this._player.tick(dt);
     this._surface.tick(dt);
+    for (let ii = 0; ii < 2; ii++) {
+      this._platforms[ii].tick(dt);
+    }
   }
 
   _touch(_, gesture) {
@@ -54,6 +58,10 @@ export default class Game extends React.Component {
     this._scene = new THREE.Scene();
     this._surface = new Surface(this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
+    this._platforms = [];
+    for (let ii = 0; ii < 2; ii++) {
+      this._platforms.push(new Platform(this._scene, this._viewport, this._surface));
+    }
   }
 
   _prepareCamera() {
