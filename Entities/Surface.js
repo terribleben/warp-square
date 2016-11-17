@@ -21,7 +21,7 @@ export default class Surface {
     }
 
     this._material = new THREE.MeshBasicMaterial( { color: 0x555555 } ),
-    this._mesh = new THREE.Mesh(this._getShapeGeometry(), this._material);
+    this._mesh = new THREE.Mesh(this._makeShapeGeometry(), this._material);
     scene.add(this._mesh);
 
     this._platforms = [];
@@ -38,7 +38,7 @@ export default class Surface {
   }
 
   tick(dt) {
-    this._mesh.geometry = this._getShapeGeometry();
+    this._updateShape();
     for (let ii = 0; ii < 2; ii++) {
       this._platforms[ii].tick(dt);
     }
@@ -105,19 +105,7 @@ export default class Surface {
     return { scaledPosition, leftIndex, rightIndex, interp };
   }
 
-  _getShapeGeometry() {
-    for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
-      // TODO: kill me
-      if (Math.random() < 0.005) {
-        this._vDepth[ii] = -0.005 + Math.random() * 0.01;
-      }
-      let left = (ii > 0) ? this._depths[ii - 1] : 0.0;
-      let right = (ii < SURFACE_NUM_SEGMENTS - 1) ? this._depths[ii + 1] : 0.0;
-      let aDepth = -this._depths[ii] * 0.02 + (left * 0.006) + (right * 0.006);
-      this._vDepth[ii] += aDepth;
-      this._depths[ii] += this._vDepth[ii];
-      this._vDepth[ii] *= 0.98;
-    }
+  _makeShapeGeometry() {
     let width = this._viewport.width;
     let shape = new THREE.Shape();
     shape.moveTo(-this._viewport.width / 2, -this._viewport.height / 2);
@@ -132,5 +120,27 @@ export default class Surface {
     shape.lineTo(this._viewport.width / 2, -this._viewport.height / 2);
     shape.lineTo(-this._viewport.width / 2, -this._viewport.height / 2);
     return new THREE.ShapeGeometry(shape);
+  }
+
+  _updateShape() {
+    for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
+      // TODO: kill me
+      if (Math.random() < 0.005) {
+        this._vDepth[ii] = -0.005 + Math.random() * 0.01;
+      }
+      let left = (ii > 0) ? this._depths[ii - 1] : 0.0;
+      let right = (ii < SURFACE_NUM_SEGMENTS - 1) ? this._depths[ii + 1] : 0.0;
+      let aDepth = -this._depths[ii] * 0.02 + (left * 0.006) + (right * 0.006);
+      this._vDepth[ii] += aDepth;
+      this._depths[ii] += this._vDepth[ii];
+      this._vDepth[ii] *= 0.98;
+    }
+    let vertices = this._mesh.geometry.vertices;
+
+    // modify in place
+    for (let vertexIdx = 1, ii = 0; ii < SURFACE_NUM_SEGMENTS; vertexIdx++, ii++) {
+      vertices[vertexIdx].y = SURFACE_NEUTRAL_DEPTH + this._depths[ii];
+    }
+    this._mesh.geometry.verticesNeedUpdate = true;
   }
 };
