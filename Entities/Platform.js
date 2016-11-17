@@ -8,17 +8,19 @@ export default class Platform {
     this._radius = 0.3 + Math.random() * 0.3;
     this._isCollided = false;
 
-    const geometry = new THREE.PlaneBufferGeometry(this._radius * 2.0, 0.1);
-
+    this._geometry = new THREE.PlaneGeometry(this._radius * 2.0, 0.1);
     this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd } ),
-
-    this._mesh = new THREE.Mesh(geometry, this._material);
+    this._mesh = new THREE.Mesh(this._geometry, this._material);
     this._mesh.position.z = -1;
     if (options.x) {
       this._mesh.position.x = options.x;
     } else {
       this._mesh.position.x = (-0.4 + Math.random() * 0.8) * viewport.width;
     }
+    this._material.frustumCulled = false;
+    this._mesh.frustumCulled = false;
+    this._geometry.frustumCulled = false;
+    this._geometry.computeBoundingSphere();
     scene.add(this._mesh);
   }
 

@@ -150,6 +150,7 @@ export default class Surface {
     }
     vertices[vertices.length - 1].x = leftBound + this._viewport.width;
     this._mesh.geometry.verticesNeedUpdate = true;
+    this._mesh.geometry.computeBoundingSphere();
   }
 
   cameraDidUpdate(cameraXOffset) {
@@ -181,5 +182,9 @@ export default class Surface {
     this._depths.unshift(rightDepth);
     let rightVel = this._vDepth.pop();
     this._vDepth.unshift(rightVel);
+  }
+
+  _addPlatform() {
+
   }
 };
