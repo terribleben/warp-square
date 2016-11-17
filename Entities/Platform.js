@@ -9,7 +9,7 @@ export default class Platform {
     this._isDead = false;
     this._sinkingOffset = 0;
     this._radius = (options.radius) ? options.radius : 0.3 + Math.random() * 0.3;
-    this._geometry = new THREE.PlaneGeometry(this._radius * 2.0, 0.15);
+    this._geometry = new THREE.PlaneBufferGeometry(this._radius * 2.0, 0.15);
     this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd } ),
     this._mesh = new THREE.Mesh(this._geometry, this._material);
     this._mesh.position.z = -1;
@@ -18,10 +18,6 @@ export default class Platform {
     } else {
       this._mesh.position.x = (-0.4 + Math.random() * 0.8) * viewport.width;
     }
-    this._material.frustumCulled = false;
-    this._mesh.frustumCulled = false;
-    this._geometry.frustumCulled = false;
-    this._geometry.computeBoundingSphere();
     scene.add(this._mesh);
   }
 
@@ -42,7 +38,7 @@ export default class Platform {
   }
 
   isAlive() {
-    return (!this._isDead || this._sinkingOffset < 0.2);
+    return (!this._isDead || this._sinkingOffset < 0.1);
   }
 
   setIsCollided(isCollided) {

@@ -107,7 +107,7 @@ export default class Surface {
 
   _scaledPosition(worldXPosition) {
     position = ((worldXPosition - this._cameraXOffset + this._viewport.width * 0.5) / this._viewport.width);
-    let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
+    let scaledPosition = Math.max(0, Math.min(1, position)) * (SURFACE_NUM_SEGMENTS - 1);
     let leftIndex = Math.floor(scaledPosition);
     let rightIndex = Math.ceil(scaledPosition);
     let interp = scaledPosition - leftIndex;
