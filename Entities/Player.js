@@ -20,7 +20,7 @@ export default class Player {
     // 1: Geometry
     // This defines the local shape of the object. In this case the geometry
     // will simply be a 1x1 plane facing the camera.
-    const geometry = new THREE.PlaneBufferGeometry(0.3, 0.3);
+    const geometry = new THREE.PlaneBufferGeometry(0.15, 0.15);
 
     // 2: Material
     // This defines how the surface of the shape is painted. In this case we
@@ -47,7 +47,7 @@ export default class Player {
   }
 
   tick(dt) {
-    let viewportHalfHeight = this._viewport.height / 2;
+    let viewportHalfWidth = this._viewport.width / 2;
 
     if (this._directionMoving == NONE) {
       this._xAccel = 0;
@@ -55,40 +55,40 @@ export default class Player {
         this._xVel *= 0.92;
       }
     } else {
-      this._xAccel = (this._directionMoving == LEFT) ? 32 : -32;
+      this._xAccel = (this._directionMoving == LEFT) ? -32 : 32;
       this._xVel += this._xAccel * dt;
       if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
       if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
     }
-    this._mesh.position.y += (this._xVel * dt);
-    if (this._mesh.position.y < -viewportHalfHeight) {
-      this._mesh.position.y = -viewportHalfHeight;
+    this._mesh.position.x += (this._xVel * dt);
+    if (this._mesh.position.x < -viewportHalfWidth) {
+      this._mesh.position.x = -viewportHalfWidth;
       this._xVel = 0;
     }
-    if (this._mesh.position.y > viewportHalfHeight) {
-      this._mesh.position.y = viewportHalfHeight;
+    if (this._mesh.position.x > viewportHalfWidth) {
+      this._mesh.position.x = viewportHalfWidth;
       this._xVel = 0;
     }
 
-    let surfaceBelow = this._surface.getDepth(this._mesh.position.y) + 0.1;
+    let surfaceBelow = this._surface.getDepth(this._mesh.position.x) + 0.05;
     if (this._isJumping) {
       this._yVel -= 0.4;
-      this._mesh.position.x += (this._yVel * dt);
-      if (this._mesh.position.x <= surfaceBelow && this._yVel <= 0) {
-        this._surface.impact(this._mesh.position.y, this._yVel * 0.03);
+      this._mesh.position.y += (this._yVel * dt);
+      if (this._mesh.position.y <= surfaceBelow && this._yVel <= 0) {
+        this._surface.impact(this._mesh.position.x, this._yVel * 0.02);
         this._isJumping = false;
         this._yVel = 0;
-        this._mesh.position.x = surfaceBelow;
+        this._mesh.position.y = surfaceBelow;
       }
     } else {
-      this._mesh.position.x = surfaceBelow;
+      this._mesh.position.y = surfaceBelow;
     }
   }
 
   touch(gesture) {
-    if (gesture.y0 < 64) {
+    if (gesture.x0 < 64) {
       this._directionMoving = LEFT;
-    } else if (gesture.y0 > this._viewport.screenHeight - 64) {
+    } else if (gesture.x0 > this._viewport.screenWidth - 64) {
       this._directionMoving = RIGHT;
     } else if (!this._isJumping) {
       this._isJumping = true;

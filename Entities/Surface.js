@@ -2,7 +2,7 @@
 const THREE = require('three');
 
 const SURFACE_NUM_SEGMENTS = 24;
-const SURFACE_NEUTRAL_DEPTH = -0.9;
+const SURFACE_NEUTRAL_DEPTH = -0.6;
 
 export default class Surface {
   constructor(scene, viewport) {
@@ -39,7 +39,7 @@ export default class Surface {
   }
 
   _scaledPosition(screenPosition) {
-    position = 1.0 - ((screenPosition + this._viewport.height * 0.5) / this._viewport.height);
+    position = ((screenPosition + this._viewport.width * 0.5) / this._viewport.width);
     let scaledPosition = position * (SURFACE_NUM_SEGMENTS - 1);
     let leftIndex = Math.floor(scaledPosition);
     let rightIndex = Math.ceil(scaledPosition);
@@ -51,7 +51,7 @@ export default class Surface {
     for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
       // TODO: kill me
       if (Math.random() < 0.005) {
-        this._vDepth[ii] = -0.01 + Math.random() * 0.02;
+        this._vDepth[ii] = -0.005 + Math.random() * 0.01;
       }
       let left = (ii > 0) ? this._depths[ii - 1] : 0.0;
       let right = (ii < SURFACE_NUM_SEGMENTS - 1) ? this._depths[ii + 1] : 0.0;
@@ -60,19 +60,19 @@ export default class Surface {
       this._depths[ii] += this._vDepth[ii];
       this._vDepth[ii] *= 0.98;
     }
-    let width = this._viewport.height;
+    let width = this._viewport.width;
     let shape = new THREE.Shape();
-    shape.moveTo(-this._viewport.width / 2, this._viewport.height / 2);
+    shape.moveTo(-this._viewport.width / 2, -this._viewport.height / 2);
 
     // (interpolating, 1 + value)
     for (let ii = 0; ii < SURFACE_NUM_SEGMENTS; ii++) {
       let xInterp = ii / (SURFACE_NUM_SEGMENTS - 1.0);
-      shape.lineTo(SURFACE_NEUTRAL_DEPTH + this._depths[ii], (this._viewport.height / 2) - (xInterp * width));
+      shape.lineTo(-(this._viewport.width / 2) + (xInterp * width), SURFACE_NEUTRAL_DEPTH + this._depths[ii]);
     }
 
     // bottom two corners
+    shape.lineTo(this._viewport.width / 2, -this._viewport.height / 2);
     shape.lineTo(-this._viewport.width / 2, -this._viewport.height / 2);
-    shape.lineTo(-this._viewport.width / 2, this._viewport.height / 2);
     return new THREE.ShapeGeometry(shape);
   }
 };
