@@ -18,14 +18,23 @@ const THREEView = Exponent.createTHREEViewClass(THREE);
 
 const GAME_FINISHED = 0;
 const GAME_STARTED = 1;
+const LEVEL_COLORS = [
+  '#ee0000',
+  '#eeaa00',
+  '#eeee00',
+  '#00ee00',
+  '#00eeee',
+  '#ee00ee',
+  '#ff7777',
+];
 
 export default class Game extends React.Component {
   state = {
     gameStatus: GAME_STARTED,
+    level: 0,
   };
 
-  constructor(props, context) {
-    super(props, context);
+  componentDidMount() {
     this.restart();
   }
 
@@ -38,18 +47,7 @@ export default class Game extends React.Component {
       onPanResponderTerminate: this._release.bind(this),
       onShouldBlockNativeResponder: () => false,
     });
-    let maybeGameOver = (this.state.gameStatus == GAME_FINISHED) ?
-      (
-        <View style={styles.gameOver}>
-          <Text style={styles.gameOverText}>GAME OVER</Text>
-          <TouchableWithoutFeedback
-            style={styles.restartButton}
-            onPress={this.restart.bind(this)}>
-            <View><Text style={styles.restartText}>RESTART</Text></View>
-          </TouchableWithoutFeedback>
-        </View>
-      ) :
-      null;
+    let otherStuff = (this.state.gameStatus == GAME_FINISHED) ? this._renderGameOver() : this._renderReactHUD();
     return (
       <View {...this.props}>
         <THREEView
@@ -59,7 +57,30 @@ export default class Game extends React.Component {
           camera={this._camera}
           tick={this._tick.bind(this)}
         />
-        {maybeGameOver}
+        {otherStuff}
+      </View>
+    );
+  }
+
+  _renderGameOver() {
+    return (
+      <View style={styles.gameOver}>
+        <Text style={styles.gameOverText}>GAME OVER</Text>
+        <TouchableWithoutFeedback
+          style={styles.restartButton}
+          onPress={this.restart.bind(this)}>
+          <View><Text style={styles.restartText}>RESTART</Text></View>
+        </TouchableWithoutFeedback>
+      </View>
+    );
+  }
+
+  _renderReactHUD() {
+    return (
+      <View style={styles.hud}>
+        <Text style={[styles.levelText, { color: this.getLevelColor() }]}>
+          PWR {this.state.level}
+        </Text>
       </View>
     );
   }
@@ -68,27 +89,34 @@ export default class Game extends React.Component {
     return this;
   }
 
+  getLevelColor() {
+    let colorIdx = (this.state.level < LEVEL_COLORS.length) ? this.state.level : LEVEL_COLORS.length - 1;
+    return LEVEL_COLORS[colorIdx];
+  }
+
   onPlatformLanded() {
     this._numPlatformsLanded++;
-    if (this._numPlatformsLanded == 5 && !this._isInverted) {
-      this.setIsInverted(true);
+    if (this._numPlatformsLanded == 5) {
+      this.setIsInverted(!this._isInverted, true);
       this._numPlatformsLanded = 0;
+      this.setState({ level: this.state.level + 1 });
     }
   }
 
   onPlatformMissed() {
     this._numPlatformsLanded = 0;
-    if (this._isInverted) {
-      this.setIsInverted(false);
+    this.setIsInverted(!this._isInverted, false);
+    if (this.state.level > 0) {
+      this.setState({ level: this.state.level - 1 });
     } else {
       this.gameOver();
     }
   }
 
-  setIsInverted(isInverted) {
+  setIsInverted(isInverted, isLevelUp) {
     this._isInverted = isInverted;
     if (this.state.gameStatus == GAME_STARTED) {
-      this._player.setIsInverted(isInverted);
+      this._player.setIsInverted(isInverted, isLevelUp);
     }
   }
 
@@ -203,5 +231,18 @@ let styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 24,
     margin: 12,
+  },
+  hud: {
+    position: 'absolute',
+    left: 12,
+    top: Dimensions.get('window').height - 32,
+    width: Dimensions.get('window').width,
+    height: 32,
+    backgroundColor: 'transparent',
+  },
+  levelText: {
+    backgroundColor: 'transparent',
+    fontSize: 24,
+    fontWeight: '700',
   },
 })

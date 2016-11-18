@@ -3,6 +3,7 @@ const THREE = require('three');
 
 export default class Platform {
   constructor(getGame, getSurface, scene, viewport, options = {}) {
+    this._getGame = getGame;
     this._viewport = viewport;
     this._getSurface = getSurface;
     this._isCollided = false;
@@ -46,10 +47,12 @@ export default class Platform {
       // we're no longer collided. fade away and die
       this._isDead = true;
     }
-    this._isCollided = isCollided;
-    if (isCollided) {
-      this._material.color.setHex(0xff0000);
+    if (isCollided && !this._isCollided) {
+      let styleColor = this._getGame().getLevelColor();
+      let hexColor = parseInt(styleColor.substring(1), 16)
+      this._material.color.setHex(hexColor);
     }
+        this._isCollided = isCollided;
   }
 
   tick(dt) {

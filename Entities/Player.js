@@ -32,12 +32,12 @@ export default class Player {
     scene.remove(this._mesh);
   }
 
-  setIsInverted(isInverted) {
+  setIsInverted(isInverted, isLevelUp) {
     this._isInverted = isInverted;
     this._material.color.setHex((isInverted) ? 0x000000 : 0xffffff);
-    if (!isInverted) {
+    if (!isLevelUp) {
       // burst thru surface!!!
-      this._mesh.position.y += 0.5;
+      this._mesh.position.y += 0.5 * (isInverted ? -1.0 : 1.0);
       this._xVel = MAX_VEL;
       this._jump(1.0);
     }
