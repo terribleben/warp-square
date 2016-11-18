@@ -51,21 +51,7 @@ export default class Player {
     let viewportHalfWidth = this._viewport.width / 2;
 
     if (this._touchIdentifier) {
-      let maxVel;
-      if (this._touchDeltaX < 0) {
-        // can brake left
-        this._xAccel = this._touchDeltaX * 0.5;
-        this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
-        maxXVel = MAX_VEL * 0.4 * Math.min(1.0, (Math.abs(this._touchDeltaX) / 48.0));
-      } else if (this._touchDeltaX > 0) {
-        // max right is default
-        this._xAccel = MAX_ACCEL;
-        maxVel = MAX_VEL;
-      }
-      // switch direction faster
-      if (Math.sign(this._xVel) !== Math.sign(this._xAccel)) {
-        this._xVel *= 0.97;
-      }
+      this._xAccel = MAX_ACCEL;
       this._xVel += this._xAccel * dt;
       if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
       if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;

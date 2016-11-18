@@ -45,7 +45,7 @@ export default class Game extends React.Component {
           <TouchableWithoutFeedback
             style={styles.restartButton}
             onPress={this.restart.bind(this)}>
-            <Text style={styles.restartText}>RESTART</Text>
+            <View><Text style={styles.restartText}>RESTART</Text></View>
           </TouchableWithoutFeedback>
         </View>
       ) :
