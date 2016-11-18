@@ -28,9 +28,19 @@ export default class Player {
     scene.add(this._mesh);
   }
 
+  destroy(scene) {
+    scene.remove(this._mesh);
+  }
+
   setIsInverted(isInverted) {
     this._isInverted = isInverted;
     this._material.color.setHex((isInverted) ? 0x000000 : 0xffffff);
+    if (!isInverted) {
+      // burst thru surface!!!
+      this._mesh.position.y += 0.5;
+      this._xVel = MAX_VEL;
+      this._jump(1.0);
+    }
   }
 
   getPositionX() {
@@ -124,13 +134,19 @@ export default class Player {
         let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
         if (this._isInverted) { deltaY = -deltaY; }
         if (!this._isJumping && deltaY < -24) {
-          this._isJumping = true;
-          this._yVel = MAX_JUMP_VEL * Math.min(1.0, ((deltaY + 24.0) / -128.0)) * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL));
+          this._jump((deltaY + 24.0) / -128.0);
         }
       }
     }
     this._touchIdentifier = null;
     this._touchDeltaX = 0;
     this._previousTouchPosition = { x: 0, y: 0 };
+  }
+
+  _jump(amount) {
+    if (!this._isJumping) {
+      this._isJumping = true;
+      this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL)));
+    }
   }
 };

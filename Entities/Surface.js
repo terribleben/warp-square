@@ -33,6 +33,14 @@ export default class Surface {
     }
   }
 
+  destroy(scene) {
+    for (let ii = 0; ii < this._platforms.length; ii++) {
+      this._platforms[ii].destroy(scene);
+    }
+    scene.remove(this._mesh);
+    this._platforms = [];
+  }
+
   getSurface() {
     return this;
   }
@@ -97,15 +105,19 @@ export default class Surface {
     for (let ii = 0; ii < this._platforms.length; ii++) {
       let platform = this._platforms[ii];
       let xPosition = platform.getPosition().x, radius = platform.getRadius();
-      if (position > xPosition - radius && position < xPosition + radius) {
+      if (position > xPosition - radius - 0.06 && position < xPosition + radius + 0.06) {
         this._collidedPlatform = platform;
         platform.setIsCollided(true);
       } else {
         platform.setIsCollided(false);
       }
     }
-    if (this._collidedPlatform && this._collidedPlatform != prevCollidedPlatform && this._collidedPlatform.isAlive()) {
-      this._getGame().onPlatformLanded();
+    if (this._collidedPlatform) {
+      if (this._collidedPlatform != prevCollidedPlatform && this._collidedPlatform.isAlive()) {
+        this._getGame().onPlatformLanded();
+      }
+    } else {
+      this._getGame().onPlatformMissed();
     }
   }
 
@@ -200,8 +212,8 @@ export default class Surface {
   }
 
   _addPlatform() {
-    let radius = this._viewport.width * (0.09 + Math.random() * 0.07);
-    let x = this._maxPlatformX + radius + (this._viewport.width * (0.03 + Math.random() * 0.18));
+    let radius = this._viewport.width * (0.09 + Math.random() * 0.11);
+    let x = this._maxPlatformX + radius + (this._viewport.width * (0.03 + Math.random() * 0.15));
     let platform = new Platform(this._getGame, this.getSurface.bind(this), this._scene, this._viewport, { x, radius });
     this._platforms.push(platform);
     this._maxPlatformX = platform.getPosition().x + platform.getRadius();
