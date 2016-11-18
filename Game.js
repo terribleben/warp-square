@@ -14,6 +14,7 @@ const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 import Player from './Entities/Player';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
+import { SmallParticle } from './Entities/Particles';
 
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
@@ -104,7 +105,7 @@ export default class Game extends React.Component {
     return LEVEL_COLORS[colorIdx];
   }
 
-  onPlatformLanded() {
+  onPlatformLanded(platform) {
     let newNumPlatformsLanded = this._numPlatformsLanded + 1;
     if (newNumPlatformsLanded == 5) {
       this.setIsInverted(!this._isInverted, true);
@@ -112,6 +113,10 @@ export default class Game extends React.Component {
       this._setLevel(this.state.level + 1);
     } else {
       this._setNumPlatformsLanded(newNumPlatformsLanded);
+    }
+    let particles = platform.getImpactParticles(this._isInverted);
+    for (let ii = 0; ii < particles.length; ii++) {
+      this._particles[this._nextParticleId++] = particles[ii];
     }
   }
 
@@ -173,6 +178,15 @@ export default class Game extends React.Component {
       }
     }
     this._surface.tick(dt);
+    for (let key in this._particles) {
+      if (this._particles.hasOwnProperty(key)) {
+        this._particles[key].tick(dt);
+        if (!this._particles[key].isAlive()) {
+          this._particles[key].destroy(this._scene);
+          delete this._particles[key];
+        }
+      }
+    }
   }
 
   _touch(event, gesture) {
@@ -204,6 +218,14 @@ export default class Game extends React.Component {
       this._hud.destroy(this._scene);
       this._hud = null;
     }
+    if (this._particles) {
+      for (let key in this._particles) {
+        if (this._particles.hasOwnProperty(key)) {
+          this._particles[key].destroy(this._scene);
+        }
+      }
+      this._particles = null;
+    }
     this._restartCamera();
 
     this._scene = new THREE.Scene();
@@ -213,6 +235,8 @@ export default class Game extends React.Component {
     this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
     this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
+    this._particles = {};
+    this._nextParticleId = 0;
     this._maxLevel = 0;
     this._setLevel(0);
     this.setState({
@@ -254,11 +278,12 @@ export default class Game extends React.Component {
 
   _updateCamera() {
     if (this.state.gameStatus === GAME_STARTED) {
-      this._camera.left = this._player.getPositionX() - this._viewport.width * 0.5;
-      this._camera.right = this._player.getPositionX() + this._viewport.width * 0.5;
+      let playerPos = this._player.getPositionX();
+      this._camera.left = playerPos - this._viewport.width * 0.5;
+      this._camera.right = playerPos + this._viewport.width * 0.5;
       this._camera.updateProjectionMatrix();
-      this._surface.cameraDidUpdate(this._player.getPositionX());
-      this._hud.cameraDidUpdate(this._player.getPositionX());
+      this._surface.cameraDidUpdate(playerPos);
+      this._hud.cameraDidUpdate(playerPos);
     }
   }
 };

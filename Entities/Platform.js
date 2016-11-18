@@ -1,8 +1,11 @@
 
 const THREE = require('three');
 
+import { SmallParticle } from './Particles';
+
 export default class Platform {
   constructor(getGame, getSurface, scene, viewport, options = {}) {
+    this._scene = scene;
     this._getGame = getGame;
     this._viewport = viewport;
     this._getSurface = getSurface;
@@ -36,6 +39,23 @@ export default class Platform {
 
   getRotation() {
     return this._mesh.rotation.z;
+  }
+
+  getImpactParticles(isInverted) {
+    let particles = [];
+    for (let ii = 0; ii < 10; ii++) {
+      let particle = new SmallParticle(this._scene, this._viewport, {
+        color: this._material.color,
+        speed: 2.5 + Math.random() * 7.0,
+        angle: (isInverted) ? Math.PI * 0.5 : -Math.PI * 0.5,
+        position: {
+          x: this._mesh.position.x + this._radius * (-1.0 + (ii / 10.0) * 2.0),
+          y: this._mesh.position.y,
+        }
+      });
+      particles.push(particle);
+    }
+    return particles;
   }
 
   isAlive() {

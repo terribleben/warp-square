@@ -119,7 +119,7 @@ export default class Surface {
     }
     if (this._collidedPlatform) {
       if (this._collidedPlatform != prevCollidedPlatform && this._collidedPlatform.isAlive()) {
-        this._getGame().onPlatformLanded();
+        this._getGame().onPlatformLanded(this._collidedPlatform);
       }
     } else {
       this._getGame().onPlatformMissed();
