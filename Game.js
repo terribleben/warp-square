@@ -260,7 +260,7 @@ let styles = StyleSheet.create({
     position: 'absolute',
     left: 12,
     top: Dimensions.get('window').height - 52,
-    width: Dimensions.get('window').width,
+    width: 92,
     backgroundColor: 'transparent',
   },
   levelText: {

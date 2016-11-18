@@ -13,9 +13,10 @@ export default class Player {
     this._yVel = 0;
     this._touchIdentifier = null;
     this._initialTouchPosition = { x: 0, y: 0 };
-    this._previousTouchPosition = { x: 0, y: 0 };
-    this._touchDeltaX = 0;
+    this._numTouchSteps = 0;
+    this._touchYPositions = [];
     this._isJumping = true;
+    this._isJumpAvailable = false;
     this._surface = surface;
     this._isInverted = false;
 
@@ -50,7 +51,7 @@ export default class Player {
   tick(dt) {
     let viewportHalfWidth = this._viewport.width / 2;
 
-    if (this._touchIdentifier) {
+    if (this._touchIdentifier !== null) {
       this._xAccel = MAX_ACCEL;
       this._xVel += this._xAccel * dt;
       if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
@@ -99,15 +100,19 @@ export default class Player {
   touch(touches, gesture) {
     if (touches && touches.length) {
       let firstTouch = touches[0];
-      if (!this._touchIdentifier) {
+      if (!this._touchIdentifier && !this._isJumping) {
         this._touchIdentifier = firstTouch.identifier;
         this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
-        this._previousTouchPosition = this._initialTouchPosition;
-        this._touchDeltaX = 0;
+        this._isJumpAvailable = true;
+        this._numTouchSteps = 0;
+        this._touchYPositions = [this._initialTouchPosition.y];
       } else if (firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
-        this._touchDeltaX = currentTouchPosition.x - this._initialTouchPosition.x;
-        this._previousTouchPosition = currentTouchPosition;
+        this._numTouchSteps++;
+        let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
+        this._touchYPositions.push(currentTouchPosition.y);
+        if (this._touchYPositions.length > 3) { this._touchYPositions.shift() };
+        this._maybeJump(deltaY, false);
       }
     }
   }
@@ -118,20 +123,31 @@ export default class Player {
       if (this._touchIdentifier && firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
         let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
-        if (this._isInverted) { deltaY = -deltaY; }
-        if (!this._isJumping && deltaY < -24) {
-          this._jump((deltaY + 24.0) / -128.0);
-        }
+        this._touchYPositions.push(currentTouchPosition.y);
+        if (this._touchYPositions.length > 3) { this._touchYPositions.shift() };
+        this._maybeJump(deltaY, true);
       }
     }
     this._touchIdentifier = null;
-    this._touchDeltaX = 0;
-    this._previousTouchPosition = { x: 0, y: 0 };
+    this._numTouchSteps = 0;
+    this._touchYPositions = [];
+  }
+
+  _maybeJump(touchDeltaY, isRelease) {
+    let velocity = (this._touchYPositions[this._touchYPositions.length - 1] - this._touchYPositions[0]) / this._touchYPositions.length;
+    if (this._isInverted) {
+      touchDeltaY = -touchDeltaY;
+      velocity = -velocity;
+    }
+    if (!this._isJumping && touchDeltaY < -32 && (velocity < -20 || isRelease)) {
+      this._jump(-velocity / 24.0);
+    }
   }
 
   _jump(amount) {
-    if (!this._isJumping) {
+    if (!this._isJumping && this._isJumpAvailable) {
       this._isJumping = true;
+      this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL)));
     }
   }
