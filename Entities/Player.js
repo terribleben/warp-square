@@ -2,7 +2,7 @@
 const THREE = require('three');
 
 const MAX_ACCEL = 20;
-const MAX_VEL = 2.5;
+const BASE_MAX_VEL = 2.5;
 const MAX_JUMP_VEL = 6;
 
 export default class Player {
@@ -20,6 +20,7 @@ export default class Player {
     this._surface = surface;
     this._isInverted = false;
     this._isExploded = false;
+    this._moreMaxVel = 0;
 
     const geometry = new THREE.PlaneBufferGeometry(0.12, 0.12);
     this._material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true } ),
@@ -42,13 +43,21 @@ export default class Player {
     this._isExploded = true;
   }
 
+  setMaxVelMore(moreAmount) {
+    this._moreMaxVel = moreAmount * 0.08;
+  }
+
+  _getMaxVel() {
+    return BASE_MAX_VEL + this._moreMaxVel;
+  }
+
   setIsInverted(isInverted, isLevelUp) {
     this._isInverted = isInverted;
     this._material.color.setHex((isInverted) ? 0x000000 : 0xffffff);
     if (!isLevelUp) {
       // burst thru surface!!!
       this._mesh.position.y += 0.5 * (isInverted ? -1.0 : 1.0);
-      this._xVel = MAX_VEL;
+      this._xVel = this._getMaxVel();
       this._jump(1.0, true);
     }
   }
@@ -63,8 +72,8 @@ export default class Player {
     if (this._touchIdentifier !== null && !this._isExploded) {
       this._xAccel = MAX_ACCEL;
       this._xVel += this._xAccel * dt;
-      if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
-      if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
+      if (this._xVel < -this._getMaxVel()) this._xVel = -this._getMaxVel();
+      if (this._xVel > this._getMaxVel()) this._xVel = this._getMaxVel();
     } else {
       this._xAccel = 0;
       if (!this._isJumping) {
@@ -164,7 +173,7 @@ export default class Player {
     if (!this._isJumping && !this._isExploded && (this._isJumpAvailable || force)) {
       this._isJumping = true;
       this._isJumpAvailable = false;
-      this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL)));
+      this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / this._getMaxVel())));
     }
   }
 };

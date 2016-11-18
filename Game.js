@@ -29,6 +29,9 @@ const LEVEL_COLORS = [
   '#00eeee',
   '#ee00ee',
   '#ff7777',
+  '#007700',
+  '#0077ee',
+  '#666666'
 ];
 
 export default class Game extends React.Component {
@@ -166,6 +169,7 @@ export default class Game extends React.Component {
       if (level > this.state.level) {
         // difficulty will only increase, not go back down
         this._difficulty += (level - this.state.level);
+        this._player.setMaxVelMore(this._difficulty);
         this._maxLevel = level;
       }
       this.setState({ level }, () => {
