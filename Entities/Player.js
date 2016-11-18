@@ -40,7 +40,7 @@ export default class Player {
       // burst thru surface!!!
       this._mesh.position.y += 0.5 * (isInverted ? -1.0 : 1.0);
       this._xVel = MAX_VEL;
-      this._jump(1.0);
+      this._jump(1.0, true);
     }
   }
 
@@ -144,8 +144,8 @@ export default class Player {
     }
   }
 
-  _jump(amount) {
-    if (!this._isJumping && this._isJumpAvailable) {
+  _jump(amount, force = false) {
+    if (!this._isJumping && (this._isJumpAvailable || force)) {
       this._isJumping = true;
       this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL)));

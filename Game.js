@@ -89,6 +89,10 @@ export default class Game extends React.Component {
     return this;
   }
 
+  getDifficulty() {
+    return this._difficulty;
+  }
+
   getLevelColor() {
     let colorIdx = (this.state.level < LEVEL_COLORS.length) ? this.state.level : LEVEL_COLORS.length - 1;
     return LEVEL_COLORS[colorIdx];
@@ -122,6 +126,10 @@ export default class Game extends React.Component {
 
   _setLevel(level) {
     if (level !== this.state.level) {
+      if (level > this.state.level) {
+        // difficulty will only increase, not go back down
+        this._difficulty += (level - this.state.level);
+      }
       this.setState({ level }, () => {
         this._hud.setLevel(level);
       });
@@ -138,20 +146,25 @@ export default class Game extends React.Component {
   }
 
   gameOver() {
-    if (this.state.gameStatus == GAME_STARTED) {
-      this._player.destroy(this._scene);
-      this._player = null;
-      this.setState({ gameStatus: GAME_FINISHED });
+    if (this.state.gameStatus === GAME_STARTED) {
+      this.setState({ gameStatus: GAME_FINISHED }, () => {
+        this._player.destroy(this._scene);
+        this._player = null;
+        this._hud.destroy(this._scene);
+        this._hud = null;
+      });
     }
   }
 
   _tick(dt) {
     this._updateCamera();
-    if (this.state.gameStatus == GAME_STARTED) {
+    if (this.state.gameStatus === GAME_STARTED) {
       this._player.tick(dt);
+      if (this._hud) {
+        this._hud.tick(dt);
+      }
     }
     this._surface.tick(dt);
-    this._hud.tick(dt);
   }
 
   _touch(event, gesture) {
@@ -188,6 +201,7 @@ export default class Game extends React.Component {
     this._scene = new THREE.Scene();
     this._isInverted = false;
     this._numPlatformsLanded = 0;
+    this._difficulty = 0;
     this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
     this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
@@ -219,8 +233,7 @@ export default class Game extends React.Component {
   }
 
   _updateCamera() {
-    // this._camera.position.x = this._player.getPositionX();
-    if (this.state.gameStatus == GAME_STARTED) {
+    if (this.state.gameStatus === GAME_STARTED) {
       this._camera.left = this._player.getPositionX() - this._viewport.width * 0.5;
       this._camera.right = this._player.getPositionX() + this._viewport.width * 0.5;
       this._camera.updateProjectionMatrix();

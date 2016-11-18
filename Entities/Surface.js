@@ -217,10 +217,72 @@ export default class Surface {
   }
 
   _addPlatform() {
-    let radius = this._viewport.width * (0.09 + Math.random() * 0.11);
-    let x = this._maxPlatformX + radius + (this._viewport.width * (0.03 + Math.random() * 0.15));
+    let difficulty = this._getGame().getDifficulty();
+    let { gap, radius } = this._getPlatformSpecs(difficulty);
+
+    let x = this._maxPlatformX + radius + gap;
     let platform = new Platform(this._getGame, this.getSurface.bind(this), this._scene, this._viewport, { x, radius });
     this._platforms.push(platform);
     this._maxPlatformX = platform.getPosition().x + platform.getRadius();
+  }
+
+  _getPlatformSpecs(difficulty) {
+    /*
+    0: easy, easy, easy, medium
+    1: easy, easy, medium, medium
+    2: easy, medium, medium, hard
+    3: easy, medium, hard, hard
+    4: easy, medium, hard, hard, hard
+    5: ...
+    */
+
+    let difficultyMatrix = [
+      [ 0, 0, 0, 1 ],
+      [ 0, 0, 1, 1 ],
+      [ 0, 1, 1, 2 ],
+      [ 0, 1, 2, 2 ],
+    ];
+    let difficultyDistribution = (difficulty < difficultyMatrix.length) ?
+      difficultyMatrix[difficulty] :
+      difficultyMatrix[difficultyMatrix.length - 1];
+    if (difficulty >= difficultyMatrix.length) {
+      for (let ii = 0; ii <= difficulty - difficultyMatrix.length; ii++) {
+        difficultyDistribution.push(2);
+      }
+    }
+    let platformDifficulty = difficultyDistribution[Math.floor(Math.random() * difficultyDistribution.length)];
+
+    let gap, radius;
+    switch (platformDifficulty) {
+      case 0: {
+        gap = 0.04 + Math.random() * 0.04;
+        radius = 0.14 + Math.random() * 0.12;
+        break;
+      }
+      case 1: {
+        gap = 0.09 + Math.random() * 0.04;
+        radius = 0.11 + Math.random() * 0.09;
+        break;
+      }
+      case 2: {
+        gap = 0.11 + Math.random() * 0.06;
+        radius = 0.09 + Math.random() * 0.05;
+        break;
+      }
+    }
+    gap *= this._viewport.width;
+    radius *= this._viewport.width;
+    return { gap, radius };
+
+    // radii get smaller with difficulty
+    /* let maxRadiusVariance = Math.max(0.02, 0.15 - (difficulty * 0.01));
+    let radius = this._viewport.width * (0.09 + Math.random() * maxRadiusVariance);
+
+    // gaps get larger with difficulty
+    // difficult: range 0.14-0.18. easy: range 0.03 - 0.07
+    // TODO: add variety
+    let baseGap = Math.min(0.14, 0.04 + (difficulty * 0.01));
+    let gap =  + (this._viewport.width * (baseGap + Math.random() * 0.04));
+    return { gap, radius }; */
   }
 };
