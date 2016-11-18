@@ -38,6 +38,8 @@ export default class Game extends React.Component {
   state = {
     gameStatus: GAME_STARTED,
     level: 0,
+    score: 0,
+    subscore: 0,
     hudTop: 0,
     overlayWidth: 0,
   };
@@ -57,6 +59,7 @@ export default class Game extends React.Component {
       onShouldBlockNativeResponder: () => false,
     });
     let otherStuff = (this.state.gameStatus == GAME_FINISHED) ? this._renderGameOver() : this._renderReactHUD();
+    let maybeScore = (this.state.gameStatus !== GAME_FINISHED) ? this._renderReactScore() : null;
     return (
       <View {...this.props}>
         <THREEView
@@ -67,6 +70,7 @@ export default class Game extends React.Component {
           tick={this._tick.bind(this)}
         />
         {otherStuff}
+        {maybeScore}
       </View>
     );
   }
@@ -76,6 +80,7 @@ export default class Game extends React.Component {
       <View style={[styles.gameOver, { width: this.state.overlayWidth }]}>
         <Text style={styles.gameOverText}>GAME OVER</Text>
         <Text style={styles.detailText}>MAX PWR {this._maxLevel}</Text>
+        <Text style={styles.detailText}>SCORE {this.state.score}</Text>
         <TouchableWithoutFeedback
           style={styles.restartButton}
           onPress={this.restart.bind(this)}>
@@ -95,6 +100,20 @@ export default class Game extends React.Component {
     );
   }
 
+  _renderReactScore() {
+    let maybeSubscore = (this.state.subscore > 0) ?
+      (<Text style={[styles.levelText, { color: this.getLevelColor() }]}>+{this.state.subscore}</Text>) :
+      null;
+    return (
+      <View style={[styles.hud, { top: 8 }]}>
+        <Text style={[styles.levelText, { color: '#ffffff' }]}>
+          SCORE {this.state.score}
+        </Text>
+        {maybeSubscore}
+      </View>
+    );
+  }
+
   getGame() {
     return this;
   }
@@ -110,6 +129,7 @@ export default class Game extends React.Component {
 
   onPlatformLanded(platform) {
     let newNumPlatformsLanded = this._numPlatformsLanded + 1;
+    this.setState({ subscore: this.state.subscore + (10 * (this.state.level + 1)) });
     if (newNumPlatformsLanded == 5) {
       this.setIsInverted(!this._isInverted, true);
       this._setNumPlatformsLanded(0);
@@ -172,7 +192,11 @@ export default class Game extends React.Component {
         this._player.setMaxVelMore(this._difficulty);
         this._maxLevel = level;
       }
-      this.setState({ level }, () => {
+      this.setState({
+        level,
+        score: this.state.score + this.state.subscore,
+        subscore: 0,
+      }, () => {
         this._hud.setLevel(level);
       });
     } else {
@@ -189,7 +213,11 @@ export default class Game extends React.Component {
 
   gameOver() {
     if (this.state.gameStatus === GAME_STARTED) {
-      this.setState({ gameStatus: GAME_FINISHED }, () => {
+      this.setState({
+        gameStatus: GAME_FINISHED,
+        score: this.state.score + this.state.subscore,
+        subscore: 0,
+      }, () => {
         this._player.destroy(this._scene);
         this._player = null;
         this._hud.destroy(this._scene);
@@ -272,6 +300,8 @@ export default class Game extends React.Component {
       gameStatus: GAME_STARTED,
       hudTop: this._viewport.screenHeight - 56,
       overlayWidth: this._viewport.screenWidth,
+      score: 0,
+      subscore: 0,
     });
   }
 
@@ -320,7 +350,7 @@ export default class Game extends React.Component {
 let styles = StyleSheet.create({
   gameOver: {
     position: 'absolute',
-    top: 96,
+    top: 72,
     left: 0,
     height: 128,
     backgroundColor: 'transparent',
@@ -347,7 +377,7 @@ let styles = StyleSheet.create({
     color: '#000000',
     fontFamily: 'monofont',
     fontSize: 24,
-    margin: 8,
+    margin: 4,
   },
   hud: {
     position: 'absolute',
