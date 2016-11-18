@@ -15,7 +15,7 @@ export default class Player {
     this._initialTouchPosition = { x: 0, y: 0 };
     this._previousTouchPosition = { x: 0, y: 0 };
     this._touchDeltaX = 0;
-    this._isJumping = false;
+    this._isJumping = true;
     this._surface = surface;
 
     const geometry = new THREE.PlaneBufferGeometry(0.12, 0.12);
@@ -23,6 +23,7 @@ export default class Player {
 
     this._mesh = new THREE.Mesh(geometry, this._material);
     this._mesh.position.z = -10;
+    this._mesh.position.y = viewport.width * 0.2;
     scene.add(this._mesh);
   }
 

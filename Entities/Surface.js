@@ -13,7 +13,7 @@ export default class Surface {
     this._segmentXOffset = 0;
     this._cameraXOffset = 0;
     this._getGame = getGame;
-    this._maxPlatformX = 0;
+    this._maxPlatformX = viewport.width * -0.2;
     this._scene = scene;
 
     this._depths = [];
