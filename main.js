@@ -7,6 +7,7 @@ import {
 
 import Game from './Game';
 import Menu from './Menu';
+import cacheAssetsAsync from './Assets/cacheAssetsAsync';
 
 class App extends React.Component {
   state = {
@@ -21,7 +22,22 @@ class App extends React.Component {
   }
 
   async load() {
-    this.setState({ loaded: true });
+    try {
+      await cacheAssetsAsync({
+        images: [],
+        fonts: [
+          {'monofont': require('./Assets/monofont.ttf')},
+        ],
+      });
+    } catch(e) {
+      console.warn(
+        'There was an error caching assets (see: main.js), perhaps due to a ' +
+        'network timeout, so we skipped caching. Reload the app to try again.'
+      );
+      console.log(e.message);
+    } finally {
+      this.setState({loaded: true});
+    }
   }
 
   _onPressStart = () => {

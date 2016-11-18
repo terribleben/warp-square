@@ -213,7 +213,7 @@ export default class Game extends React.Component {
     this._setLevel(0);
     this.setState({
       gameStatus: GAME_STARTED,
-      hudTop: this._viewport.screenHeight - 52,
+      hudTop: this._viewport.screenHeight - 56,
       overlayWidth: this._viewport.screenWidth,
     });
   }
@@ -269,7 +269,7 @@ let styles = StyleSheet.create({
   },
   gameOverText: {
     color: '#ff00ff',
-    fontWeight: '700',
+    fontFamily: 'monofont',
     backgroundColor: 'transparent',
     fontSize: 64,
     textAlign: 'center',
@@ -280,19 +280,19 @@ let styles = StyleSheet.create({
   restartText: {
     textAlign: 'center',
     color: '#ff0000',
-    fontWeight: '700',
+    fontFamily: 'monofont',
     fontSize: 24,
     margin: 12,
   },
   hud: {
     position: 'absolute',
     left: 12,
-    width: 92,
+    width: 128,
     backgroundColor: 'transparent',
   },
   levelText: {
     backgroundColor: 'transparent',
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: 'monofont',
   },
 })

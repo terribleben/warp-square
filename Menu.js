@@ -47,10 +47,10 @@ let styles = StyleSheet.create({
   },
   startText: {
     color: '#ffffff',
-    fontWeight: '700',
     fontSize: 64,
     textAlign: 'center',
     backgroundColor: 'transparent',
+    fontFamily: 'monofont',
   },
   instructions: {
     padding: 16,
@@ -59,8 +59,8 @@ let styles = StyleSheet.create({
   instructionsText: {
     textAlign: 'center',
     color: '#dddddd',
-    fontSize: 18,
+    fontSize: 16,
     paddingVertical: 8,
-    fontWeight: '700',
+    fontFamily: 'monofont',
   },
 });
