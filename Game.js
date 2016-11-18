@@ -71,6 +71,7 @@ export default class Game extends React.Component {
     return (
       <View style={[styles.gameOver, { width: this.state.overlayWidth }]}>
         <Text style={styles.gameOverText}>GAME OVER</Text>
+        <Text style={styles.detailText}>MAX PWR {this._maxLevel}</Text>
         <TouchableWithoutFeedback
           style={styles.restartButton}
           onPress={this.restart.bind(this)}>
@@ -135,6 +136,7 @@ export default class Game extends React.Component {
       if (level > this.state.level) {
         // difficulty will only increase, not go back down
         this._difficulty += (level - this.state.level);
+        this._maxLevel = level;
       }
       this.setState({ level }, () => {
         this._hud.setLevel(level);
@@ -211,6 +213,7 @@ export default class Game extends React.Component {
     this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
     this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
+    this._maxLevel = 0;
     this._setLevel(0);
     this.setState({
       gameStatus: GAME_STARTED,
@@ -284,6 +287,13 @@ let styles = StyleSheet.create({
     fontFamily: 'monofont',
     fontSize: 24,
     margin: 12,
+  },
+  detailText: {
+    textAlign: 'center',
+    color: '#000000',
+    fontFamily: 'monofont',
+    fontSize: 24,
+    margin: 8,
   },
   hud: {
     position: 'absolute',
