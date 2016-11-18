@@ -7,6 +7,7 @@ import {
 
 import Player from './Entities/Player';
 import Surface from './Entities/Surface';
+import HUD from './HUD/HUD';
 
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
@@ -42,6 +43,14 @@ export default class Game extends React.Component {
     return this;
   }
 
+  onPlatformLanded() {
+    this._numPlatformsLanded++;
+    if (this._numPlatformsLanded == 5) {
+      this._isInverted = true;
+      this._player.setIsInverted(true);
+    }
+  }
+
   _tick(dt) {
     this._updateCamera();
     this._player.tick(dt);
@@ -62,6 +71,8 @@ export default class Game extends React.Component {
 
   _prepareScene(scene) {
     this._scene = new THREE.Scene();
+    this._isInverted = false;
+    this._numPlatformsLanded = 0;
     this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
   }
@@ -70,9 +81,12 @@ export default class Game extends React.Component {
     const width = 4;
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const height = (screenHeight / screenWidth) * width;
+    console.log('setting up camera with screen width/height:', screenWidth, screenHeight)
+    let orthoWidth = !(width > height) ? width : height;
+    let orthoHeight = !(width > height) ? width : height;
     this._camera = new THREE.OrthographicCamera(
-      -width / 2, width / 2,
-      height / 2, -height / 2,
+      -orthoWidth / 2, orthoWidth / 2,
+      orthoHeight / 2, -orthoHeight / 2,
       1, 10000,
     );
     this._camera.position.z = 1000;
@@ -90,5 +104,6 @@ export default class Game extends React.Component {
     this._camera.right = this._player.getPositionX() + this._viewport.width * 0.5;
     this._camera.updateProjectionMatrix();
     this._surface.cameraDidUpdate(this._player.getPositionX());
+    // this._hud.cameraDidUpdate(this._player.getPositionX());
   }
 };

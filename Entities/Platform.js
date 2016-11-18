@@ -10,7 +10,7 @@ export default class Platform {
     this._sinkingOffset = 0;
     this._radius = (options.radius) ? options.radius : 0.3 + Math.random() * 0.3;
     this._geometry = new THREE.PlaneBufferGeometry(this._radius * 2.0, 0.15);
-    this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd } ),
+    this._material = new THREE.MeshBasicMaterial( { color: 0xdddddd, transparent: true } ),
     this._mesh = new THREE.Mesh(this._geometry, this._material);
     this._mesh.position.z = -1;
     if (options.x) {
@@ -47,12 +47,15 @@ export default class Platform {
       this._isDead = true;
     }
     this._isCollided = isCollided;
-    this._material.color.setHex((isCollided) ? 0xff0000 : 0xdddddd);
+    if (isCollided) {
+      this._material.color.setHex(0xff0000);
+    }
   }
 
   tick(dt) {
     if (this._isDead) {
       this._sinkingOffset += 0.05 * dt;
+      this._material.opacity = 1.0 - (this._sinkingOffset / 0.1);
     }
     let yLeft = this._getSurface().getDepth(this._mesh.position.x + this._radius);
     let yRight = this._getSurface().getDepth(this._mesh.position.x - this._radius);

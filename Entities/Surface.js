@@ -4,7 +4,7 @@ const THREE = require('three');
 import Platform from './Platform';
 
 const SURFACE_NUM_SEGMENTS = 36;
-const SURFACE_NEUTRAL_DEPTH = -0.6;
+const SURFACE_NEUTRAL_DEPTH = 0;
 
 export default class Surface {
   constructor(getGame, scene, viewport) {
@@ -23,7 +23,7 @@ export default class Surface {
       this._vDepth.push(0);
     }
 
-    this._material = new THREE.MeshBasicMaterial( { color: 0x555555 } ),
+    this._material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.5 } ),
     this._mesh = new THREE.Mesh(this._makeShapeGeometry(), this._material);
     scene.add(this._mesh);
 
@@ -91,6 +91,7 @@ export default class Surface {
   }
 
   maybeCollideWithPlatform(position) {
+    let prevCollidedPlatform = this._collidedPlatform;
     this._collidedPlatform = null;
 
     for (let ii = 0; ii < this._platforms.length; ii++) {
@@ -102,6 +103,9 @@ export default class Surface {
       } else {
         platform.setIsCollided(false);
       }
+    }
+    if (this._collidedPlatform && this._collidedPlatform != prevCollidedPlatform && this._collidedPlatform.isAlive()) {
+      this._getGame().onPlatformLanded();
     }
   }
 
