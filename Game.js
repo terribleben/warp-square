@@ -95,21 +95,38 @@ export default class Game extends React.Component {
   }
 
   onPlatformLanded() {
-    this._numPlatformsLanded++;
-    if (this._numPlatformsLanded == 5) {
+    let newNumPlatformsLanded = this._numPlatformsLanded + 1;
+    if (newNumPlatformsLanded == 5) {
       this.setIsInverted(!this._isInverted, true);
-      this._numPlatformsLanded = 0;
-      this.setState({ level: this.state.level + 1 });
+      this._setNumPlatformsLanded(0);
+      this._setLevel(this.state.level + 1);
+    } else {
+      this._setNumPlatformsLanded(newNumPlatformsLanded);
     }
   }
 
   onPlatformMissed() {
-    this._numPlatformsLanded = 0;
+    this._setNumPlatformsLanded(0);
     this.setIsInverted(!this._isInverted, false);
     if (this.state.level > 0) {
-      this.setState({ level: this.state.level - 1 });
+      this._setLevel(this.state.level - 1);
     } else {
       this.gameOver();
+    }
+  }
+
+  _setNumPlatformsLanded(numPlatformsLanded) {
+    this._numPlatformsLanded = numPlatformsLanded;
+    this._hud.setProgress(this._numPlatformsLanded / 4.0);
+  }
+
+  _setLevel(level) {
+    if (level !== this.state.level) {
+      this.setState({ level }, () => {
+        this._hud.setLevel(level);
+      });
+    } else {
+      this._hud.setLevel(level);
     }
   }
 
@@ -134,6 +151,7 @@ export default class Game extends React.Component {
       this._player.tick(dt);
     }
     this._surface.tick(dt);
+    this._hud.tick(dt);
   }
 
   _touch(event, gesture) {
@@ -161,6 +179,10 @@ export default class Game extends React.Component {
       this._surface.destroy(this._scene);
       this._surface = null;
     }
+    if (this._hud) {
+      this._hud.destroy(this._scene);
+      this._hud = null;
+    }
     this._restartCamera();
 
     this._scene = new THREE.Scene();
@@ -168,6 +190,8 @@ export default class Game extends React.Component {
     this._numPlatformsLanded = 0;
     this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
     this._player = new Player(this._scene, this._viewport, this._surface);
+    this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
+    this._setLevel(0);
     this.setState({
       gameStatus: GAME_STARTED,
     });
@@ -201,8 +225,8 @@ export default class Game extends React.Component {
       this._camera.right = this._player.getPositionX() + this._viewport.width * 0.5;
       this._camera.updateProjectionMatrix();
       this._surface.cameraDidUpdate(this._player.getPositionX());
+      this._hud.cameraDidUpdate(this._player.getPositionX());
     }
-    // this._hud.cameraDidUpdate(this._player.getPositionX());
   }
 };
 
@@ -235,9 +259,8 @@ let styles = StyleSheet.create({
   hud: {
     position: 'absolute',
     left: 12,
-    top: Dimensions.get('window').height - 32,
+    top: Dimensions.get('window').height - 52,
     width: Dimensions.get('window').width,
-    height: 32,
     backgroundColor: 'transparent',
   },
   levelText: {
