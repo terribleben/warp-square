@@ -21,7 +21,7 @@ const GAME_STARTED = 1;
 const LEVEL_COLORS = [
   '#ee0000',
   '#eeaa00',
-  '#eeee00',
+  '#efef00',
   '#00ee00',
   '#00eeee',
   '#ee00ee',
