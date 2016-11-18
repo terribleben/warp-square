@@ -14,7 +14,7 @@ const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 import Player from './Entities/Player';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
-import { SmallParticle, RadialParticle, BadParticle } from './Entities/Particles';
+import { SmallParticle, RadialParticle, BadParticle, BackgroundParticle } from './Entities/Particles';
 
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
@@ -244,6 +244,9 @@ export default class Game extends React.Component {
         }
       }
     }
+    for (let ii = 0, nn = this._bgParticles.length; ii < nn; ii++) {
+      this._bgParticles[ii].tick(dt);
+    }
   }
 
   _touch(event, gesture) {
@@ -259,6 +262,35 @@ export default class Game extends React.Component {
     let touches = nativeEvent ? nativeEvent.changedTouches : null;
     if (this.state.gameStatus == GAME_STARTED) {
       this._player.release(touches, gesture);
+    }
+  }
+
+  _makeBgParticles() {
+    for (let ii = 0; ii < 6; ii++) {
+      let particle = new BackgroundParticle(this._scene, this._viewport, {
+        position: {
+          x: this._viewport.width * (-0.5 + Math.random() * 2.0),
+          y: this._viewport.width * (-0.2 + Math.random() * 0.3),
+          z: -49,
+        },
+        rotation: Math.PI * Math.random(),
+        color: 0x252525,
+        parallax: 0.9,
+      });
+      this._bgParticles.push(particle);
+    }
+    for (let ii = 0; ii < 6; ii++) {
+      let particle = new BackgroundParticle(this._scene, this._viewport, {
+        position: {
+          x: this._viewport.width * (-0.5 + Math.random() * 2.0),
+          y: this._viewport.width * (-0.1 + Math.random() * 0.4),
+          z: -50,
+        },
+        rotation: Math.PI * Math.random(),
+        color: 0x191919,
+        parallax: 0.95,
+      });
+      this._bgParticles.push(particle);
     }
   }
 
@@ -283,6 +315,12 @@ export default class Game extends React.Component {
       }
       this._particles = null;
     }
+    if (this._bgParticles) {
+      for (let ii = 0, nn = this._bgParticles.length; ii < nn; ii++) {
+        this._bgParticles[ii].destroy(this._scene);
+      }
+      this._bgParticles = null;
+    }
     this._restartCamera();
 
     this._scene = new THREE.Scene();
@@ -293,8 +331,10 @@ export default class Game extends React.Component {
     this._player = new Player(this._scene, this._viewport, this._surface);
     this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
     this._particles = {};
+    this._bgParticles = [];
     this._nextParticleId = 0;
     this._maxLevel = 0;
+    this._makeBgParticles();
     this._setLevel(0);
     this.setState({
       gameStatus: GAME_STARTED,
@@ -343,6 +383,9 @@ export default class Game extends React.Component {
       this._camera.updateProjectionMatrix();
       this._surface.cameraDidUpdate(playerPos);
       this._hud.cameraDidUpdate(playerPos);
+      for (let ii = 0, nn = this._bgParticles.length; ii < nn; ii++) {
+        this._bgParticles[ii].cameraDidUpdate(playerPos);
+      }
     }
   }
 };
