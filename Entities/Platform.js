@@ -48,9 +48,11 @@ export default class Platform {
       this._isDead = true;
     }
     if (isCollided && !this._isCollided) {
-      let styleColor = this._getGame().getLevelColor();
-      let hexColor = parseInt(styleColor.substring(1), 16)
-      this._material.color.setHex(hexColor);
+      requestAnimationFrame(() => {
+        let styleColor = this._getGame().getLevelColor();
+        let hexColor = parseInt(styleColor.substring(1), 16)
+        this._material.color.setHex(hexColor);
+      });
     }
         this._isCollided = isCollided;
   }
