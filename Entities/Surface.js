@@ -11,6 +11,7 @@ export default class Surface {
     this._viewport = viewport;
     this._collidedPlatform = null;
     this._segmentXOffset = 0;
+    this._numSegmentsOffset = 0;
     this._cameraXOffset = 0;
     this._getGame = getGame;
     this._maxPlatformX = viewport.width * -0.2;
@@ -122,7 +123,7 @@ export default class Surface {
   }
 
   _scaledPosition(worldXPosition) {
-    position = ((worldXPosition - this._cameraXOffset + this._viewport.width * 0.5) / this._viewport.width);
+    position = ((worldXPosition + this._segmentXOffset - this._cameraXOffset + this._viewport.width * 0.5) / this._viewport.width);
     let scaledPosition = Math.max(0, Math.min(1, position)) * (SURFACE_NUM_SEGMENTS - 1);
     let leftIndex = Math.floor(scaledPosition);
     let rightIndex = Math.ceil(scaledPosition);
@@ -140,6 +141,8 @@ export default class Surface {
       let xInterp = ii / (SURFACE_NUM_SEGMENTS - 1.0);
       shape.lineTo(-(this._viewport.width / 2) + (xInterp * width), SURFACE_NEUTRAL_DEPTH + this._depths[ii]);
     }
+    // neutral top-right corner
+    shape.lineTo(this._viewport.width / 2, SURFACE_NEUTRAL_DEPTH);
 
     // bottom two corners
     shape.lineTo(this._viewport.width / 2, -this._viewport.height / 2);
@@ -169,8 +172,10 @@ export default class Surface {
     for (let vertexIdx = 1, ii = 0; ii < SURFACE_NUM_SEGMENTS; vertexIdx++, ii++) {
       let xInterp = ii / (SURFACE_NUM_SEGMENTS - 1.0);
       vertices[vertexIdx].y = SURFACE_NEUTRAL_DEPTH + this._depths[ii];
-      vertices[vertexIdx].x = leftBound + (xInterp * width);// - this._segmentXOffset;
+      vertices[vertexIdx].x = leftBound + (xInterp * width) - this._segmentXOffset;
     }
+    vertices[vertices.length - 3].x = leftBound + this._viewport.width;
+    vertices[vertices.length - 2].x = leftBound + this._viewport.width;
     vertices[vertices.length - 1].x = leftBound + this._viewport.width;
     this._mesh.geometry.verticesNeedUpdate = true;
     this._mesh.geometry.computeBoundingSphere();
@@ -178,19 +183,19 @@ export default class Surface {
 
   cameraDidUpdate(cameraXOffset) {
     let segmentWidth = this._viewport.width / (SURFACE_NUM_SEGMENTS - 1.0);
-    // recycle left segments, generate right segments
-    let delta = cameraXOffset - this._cameraXOffset;
-    while (delta > segmentWidth) {
-      this._shiftSegmentsLeft();
-      delta -= segmentWidth;
+    let numSegmentsOffset = Math.floor(cameraXOffset / segmentWidth);
+    if (numSegmentsOffset > this._numSegmentsOffset) {
+      for (let ii = 0; ii < numSegmentsOffset - this._numSegmentsOffset; ii++) {
+        this._shiftSegmentsLeft();
+      }
+    } else if (numSegmentsOffset < this._numSegmentsOffset) {
+      for (let ii = 0; ii < this._numSegmentsOffset - numSegmentsOffset; ii++) {
+        this._shiftSegmentsRight();
+      }
     }
-    // recycle right segments, generate left segments
-    while (delta < -segmentWidth) {
-      this._shiftSegmentsRight();
-      delta += segmentWidth;
-    }
-    this._segmentXOffset = delta;
     this._cameraXOffset = cameraXOffset;
+    this._numSegmentsOffset = numSegmentsOffset;
+    this._segmentXOffset = cameraXOffset - (numSegmentsOffset * segmentWidth);
 
     if (this._cameraXOffset > this._maxPlatformX - this._viewport.width * 0.5) {
       this._addPlatform();
