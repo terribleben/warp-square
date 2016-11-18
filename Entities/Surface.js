@@ -42,6 +42,10 @@ export default class Surface {
     this._platforms = [];
   }
 
+  gameOver() {
+    this._getGame().gameOver();
+  }
+
   getSurface() {
     return this;
   }

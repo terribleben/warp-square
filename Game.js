@@ -120,7 +120,8 @@ export default class Game extends React.Component {
     if (this.state.level > 0) {
       this._setLevel(this.state.level - 1);
     } else {
-      this.gameOver();
+      // begin game over sequence
+      this._player.explode();
     }
   }
 

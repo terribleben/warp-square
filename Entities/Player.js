@@ -19,9 +19,10 @@ export default class Player {
     this._isJumpAvailable = false;
     this._surface = surface;
     this._isInverted = false;
+    this._isExploded = false;
 
     const geometry = new THREE.PlaneBufferGeometry(0.12, 0.12);
-    this._material = new THREE.MeshBasicMaterial( { color: 0xffffff } ),
+    this._material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true } ),
 
     this._mesh = new THREE.Mesh(geometry, this._material);
     this._mesh.position.z = 10;
@@ -31,6 +32,14 @@ export default class Player {
 
   destroy(scene) {
     scene.remove(this._mesh);
+  }
+
+  explode() {
+    let impactMagnitude = this._yVel * 0.2 * (this._isInverted ? -1.0 : 1.0);
+    this._surface.impact(this._mesh.position.x, impactMagnitude);
+    this._surface.impact(this._mesh.position.x + 0.15, impactMagnitude * 0.5);
+    this._surface.impact(this._mesh.position.x - 0.15, impactMagnitude * 0.5);
+    this._isExploded = true;
   }
 
   setIsInverted(isInverted, isLevelUp) {
@@ -51,7 +60,7 @@ export default class Player {
   tick(dt) {
     let viewportHalfWidth = this._viewport.width / 2;
 
-    if (this._touchIdentifier !== null) {
+    if (this._touchIdentifier !== null && !this._isExploded) {
       this._xAccel = MAX_ACCEL;
       this._xVel += this._xAccel * dt;
       if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
@@ -69,7 +78,14 @@ export default class Player {
     }
 
     let surfaceBelow = this._surface.getDepth(this._mesh.position.x) + 0.05 * (this._isInverted ? -1.0 : 1.0);
-    if (this._isJumping) {
+    if (this._isExploded) {
+      this._yVel -= 0.5;
+      this._material.opacity = Math.max(0, this._material.opacity - 0.07);
+      this._mesh.position.y += (this._yVel * dt * (this._isInverted ? -1.0 : 1.0));
+      if (this._mesh.position.y < -this._viewport.height / 2 || this._mesh.position.y > this._viewport.height / 2) {
+        this._surface.gameOver();
+      }
+    } else if (this._isJumping) {
       this._yVel -= 0.5;
       this._mesh.position.y += (this._yVel * dt * (this._isInverted ? -1.0 : 1.0));
       if ((!this._isInverted && this._mesh.position.y <= surfaceBelow && this._yVel <= 0) ||
@@ -145,7 +161,7 @@ export default class Player {
   }
 
   _jump(amount, force = false) {
-    if (!this._isJumping && (this._isJumpAvailable || force)) {
+    if (!this._isJumping && !this._isExploded && (this._isJumpAvailable || force)) {
       this._isJumping = true;
       this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / MAX_VEL)));
