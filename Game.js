@@ -14,7 +14,7 @@ const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 import Player from './Entities/Player';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
-import { SmallParticle } from './Entities/Particles';
+import { SmallParticle, RadialParticle } from './Entities/Particles';
 
 const THREE = require('three');
 const THREEView = Exponent.createTHREEViewClass(THREE);
@@ -111,6 +111,16 @@ export default class Game extends React.Component {
       this.setIsInverted(!this._isInverted, true);
       this._setNumPlatformsLanded(0);
       this._setLevel(this.state.level + 1);
+      for (let ii = 0; ii < 5; ii++) {
+        let particle = new RadialParticle(this._scene, this._viewport, {
+          position: {
+            x: this._player.getPositionX(),
+            y: 0,
+          },
+          scaleFactor: (ii + 1) * 3,
+        });
+        this._particles[this._nextParticleId++] = particle;
+      }
     } else {
       this._setNumPlatformsLanded(newNumPlatformsLanded);
     }

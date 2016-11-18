@@ -11,22 +11,6 @@ export default class HUD {
     this._progress = 0;
     this._progressInterp = 0;
 
-    /* let curve = new THREE.EllipseCurve(
-    	0,  0,            // ax, aY
-    	0.3, 0.3,           // xRadius, yRadius
-    	0,  2 * Math.PI,  // aStartAngle, aEndAngle
-    	false,            // aClockwise
-    	0                 // aRotation
-    );
-
-    let path = new THREE.Path(curve.getPoints(32));
-    let geometry = path.createPointsGeometry(32);
-    let material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
-
-    // Create the final Object3d to add to the scene
-    this._ellipse = new THREE.Line(geometry, material);
-    this._ellipse.position.y = this._viewport.height * 0.35;
-    scene.add(this._ellipse); */
     const lineMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 3 } );
     this._line = new THREE.Line(this._makeRectGeometry(), lineMaterial);
     this._line.position.z = 10;
