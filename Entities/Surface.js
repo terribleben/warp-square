@@ -13,7 +13,7 @@ export default class Surface {
     this._segmentXOffset = 0;
     this._cameraXOffset = 0;
     this._getGame = getGame;
-    this._maxPlatformX = this._viewport.width * -0.4;
+    this._maxPlatformX = 0;
     this._scene = scene;
 
     this._depths = [];
@@ -196,7 +196,7 @@ export default class Surface {
   }
 
   _addPlatform() {
-    let radius = this._viewport.width * (0.06 + Math.random() * 0.07);
+    let radius = this._viewport.width * (0.09 + Math.random() * 0.07);
     let x = this._maxPlatformX + radius + (this._viewport.width * (0.03 + Math.random() * 0.18));
     let platform = new Platform(this._getGame, this.getSurface.bind(this), this._scene, this._viewport, { x, radius });
     this._platforms.push(platform);

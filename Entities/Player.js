@@ -1,8 +1,8 @@
 
 const THREE = require('three');
 
-const MAX_ACCEL = 32;
-const MAX_VEL = 1.8;
+const MAX_ACCEL = 20;
+const MAX_VEL = 2.5;
 const MAX_JUMP_VEL = 6;
 
 export default class Player {
@@ -34,20 +34,28 @@ export default class Player {
     let viewportHalfWidth = this._viewport.width / 2;
 
     if (this._touchIdentifier) {
-      this._xAccel = this._touchDeltaX * 0.5;
-      this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
-      let maxXVel = MAX_VEL * Math.min(1.0, (Math.abs(this._touchDeltaX) / 48.0));
+      let maxVel;
+      if (this._touchDeltaX < 0) {
+        // can brake left
+        this._xAccel = this._touchDeltaX * 0.5;
+        this._xAccel = Math.min(MAX_ACCEL, Math.max(-MAX_ACCEL, this._xAccel));
+        maxXVel = MAX_VEL * 0.4 * Math.min(1.0, (Math.abs(this._touchDeltaX) / 48.0));
+      } else if (this._touchDeltaX > 0) {
+        // max right is default
+        this._xAccel = MAX_ACCEL;
+        maxVel = MAX_VEL;
+      }
       // switch direction faster
       if (Math.sign(this._xVel) !== Math.sign(this._xAccel)) {
         this._xVel *= 0.97;
       }
       this._xVel += this._xAccel * dt;
-      if (this._xVel < -maxXVel) this._xVel = -maxXVel;
-      if (this._xVel > maxXVel) this._xVel = maxXVel;
+      if (this._xVel < -MAX_VEL) this._xVel = -MAX_VEL;
+      if (this._xVel > MAX_VEL) this._xVel = MAX_VEL;
     } else {
       this._xAccel = 0;
       if (!this._isJumping) {
-        this._xVel *= 0.9;
+        this._xVel *= 0.93;
       }
     }
     this._mesh.position.x += (this._xVel * dt);
@@ -78,7 +86,7 @@ export default class Player {
       let platformPosition = platform.getPosition();
       let platformRotation = platform.getRotation();
       let deltaX = this._mesh.position.x - platformPosition.x;
-      this._mesh.position.y = platformPosition.y + Math.sin(platformRotation) * deltaX + 0.1;
+      this._mesh.position.y = platformPosition.y + Math.sin(platformRotation) * deltaX + 0.13;
     } else {
       this._mesh.position.y = surfaceY;
     }
@@ -91,6 +99,7 @@ export default class Player {
         this._touchIdentifier = firstTouch.identifier;
         this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
         this._previousTouchPosition = this._initialTouchPosition;
+        this._touchDeltaX = 0;
       } else if (firstTouch.identifier == this._touchIdentifier) {
         let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
         this._touchDeltaX = currentTouchPosition.x - this._initialTouchPosition.x;
