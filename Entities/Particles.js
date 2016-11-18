@@ -94,7 +94,59 @@ class RadialParticle {
   }
 };
 
+class BadParticle {
+  constructor(scene, viewport, options = {}) {
+    this._viewport = viewport;
+    this._velocity = { x: 0, y: 0 };
+    this._lifespan = 0.8;
+    this._ttl = this._lifespan;
+    this._position = { x: 0, y: 0 };
+    this._scaleMult = options.scaleMult ? options.scaleMult : 0.99;
+    this._aVel = (options.aVel) ? options.aVel : 0.5;
+
+    let curve = new THREE.EllipseCurve(
+      0,  0,            // ax, aY
+      2.0, 2.0,           // xRadius, yRadius
+      0, 2 * Math.PI,  // aStartAngle, aEndAngle
+      false,            // aClockwise
+      0                 // aRotation
+    );
+
+    let path = new THREE.Path(curve.getPoints(11));
+    let geometry = path.createPointsGeometry(11);
+    this._material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3, transparent: true });
+
+    // Create the final Object3d to add to the scene
+    this._ellipse = new THREE.Line(geometry, this._material);
+
+    this._ellipse.position.z = 2;
+    if (options.position) {
+      this._position = options.position;
+    }
+    scene.add(this._ellipse);
+  }
+
+  isAlive() {
+    return (this._ttl > 0);
+  }
+
+  destroy(scene) {
+    scene.remove(this._ellipse);
+  }
+
+  tick(dt) {
+    this._material.opacity = (this._ttl / this._lifespan);
+    this._ellipse.position.x = this._position.x;
+    this._ellipse.position.y = this._position.y;
+    this._ellipse.scale.x *= this._scaleMult;
+    this._ellipse.scale.y *= this._scaleMult;
+    this._ellipse.rotation.z += this._aVel;
+    this._ttl -= dt;
+  }
+};
+
 export {
   SmallParticle,
   RadialParticle,
+  BadParticle,
 };
