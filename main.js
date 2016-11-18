@@ -6,10 +6,12 @@ import {
 } from 'react-native';
 
 import Game from './Game';
+import Menu from './Menu';
 
 class App extends React.Component {
   state = {
     loaded: false,
+    isShowingMenu: true,
   }
 
   componentWillMount() {
@@ -22,12 +24,24 @@ class App extends React.Component {
     this.setState({ loaded: true });
   }
 
+  _onPressStart = () => {
+    this.setState({ isShowingMenu: false });
+  }
+
   render() {
-    return (this.state.loaded) ? (
-      <Game style={styles.container} />
-    ) : (
-      <Exponent.Components.AppLoading />
-    );
+    if (this.state.loaded) {
+      if (this.state.isShowingMenu) {
+        return (
+          <Menu
+            style={styles.container}
+            onPressStart={this._onPressStart} />
+          );
+      } else {
+        return (<Game style={styles.container} />);
+      }
+    } else {
+      return (<Exponent.Components.AppLoading />);
+    }
   }
 }
 
