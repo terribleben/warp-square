@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native';
 
+const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
+
 import Player from './Entities/Player';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
@@ -32,9 +34,12 @@ export default class Game extends React.Component {
   state = {
     gameStatus: GAME_STARTED,
     level: 0,
+    hudTop: 0,
+    overlayWidth: 0,
   };
 
   componentDidMount() {
+    RCTDeviceEventEmitter.addListener('didUpdateDimensions', this.restart.bind(this));
     this.restart();
   }
 
@@ -64,7 +69,7 @@ export default class Game extends React.Component {
 
   _renderGameOver() {
     return (
-      <View style={styles.gameOver}>
+      <View style={[styles.gameOver, { width: this.state.overlayWidth }]}>
         <Text style={styles.gameOverText}>GAME OVER</Text>
         <TouchableWithoutFeedback
           style={styles.restartButton}
@@ -77,7 +82,7 @@ export default class Game extends React.Component {
 
   _renderReactHUD() {
     return (
-      <View style={styles.hud}>
+      <View style={[styles.hud, { top: this.state.hudTop }]}>
         <Text style={[styles.levelText, { color: this.getLevelColor() }]}>
           PWR {this.state.level}
         </Text>
@@ -208,27 +213,38 @@ export default class Game extends React.Component {
     this._setLevel(0);
     this.setState({
       gameStatus: GAME_STARTED,
+      hudTop: this._viewport.screenHeight - 52,
+      overlayWidth: this._viewport.screenWidth,
     });
   }
 
   _restartCamera() {
-    const width = 4;
-    const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-    const height = (screenHeight / screenWidth) * width;
+    let width, height;
+    let { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     console.log('setting up camera with screen width/height:', screenWidth, screenHeight)
-    let orthoWidth = !(width > height) ? width : height;
-    let orthoHeight = !(width > height) ? width : height;
-    this._camera = new THREE.OrthographicCamera(
-      -orthoWidth / 2, orthoWidth / 2,
-      orthoHeight / 2, -orthoHeight / 2,
-      1, 10000,
-    );
+    if (screenWidth > screenHeight) {
+      width = 4;
+      height = (screenHeight / screenWidth) * width;
+      this._camera = new THREE.OrthographicCamera(
+        -width / 2, width / 2,
+        height / 2, -height / 2,
+        1, 10000,
+      );
+    } else {
+      width = 4;
+      height = (screenWidth / screenHeight) * width;
+      this._camera = new THREE.OrthographicCamera(
+        -width / 2, width / 2,
+        height / 2, -height / 2,
+        1, 10000,
+      );
+    }
     this._camera.position.z = 1000;
     this._viewport = {
       width,
       height,
-      screenWidth,
-      screenHeight,
+      screenWidth: (screenWidth > screenHeight) ? screenWidth : screenHeight,
+      screenHeight: (screenWidth > screenHeight) ? screenHeight : screenWidth,
     };
   }
 
@@ -248,7 +264,6 @@ let styles = StyleSheet.create({
     position: 'absolute',
     top: 96,
     left: 0,
-    width: Dimensions.get('window').width,
     height: 128,
     backgroundColor: 'transparent',
   },
@@ -272,7 +287,6 @@ let styles = StyleSheet.create({
   hud: {
     position: 'absolute',
     left: 12,
-    top: Dimensions.get('window').height - 52,
     width: 92,
     backgroundColor: 'transparent',
   },
