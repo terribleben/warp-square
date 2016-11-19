@@ -5,7 +5,7 @@ import {
   PanResponder,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -78,14 +78,18 @@ export default class Game extends React.Component {
   _renderGameOver() {
     return (
       <View style={[styles.gameOver, { width: this.state.overlayWidth }]}>
-        <Text style={styles.gameOverText}>GAME OVER</Text>
+        <TouchableOpacity
+          style={styles.restartButton}
+          onPress={this.restart.bind(this)}>
+          <View><Text style={styles.gameOverText}>GAME OVER</Text></View>
+        </TouchableOpacity>
         <Text style={styles.detailText}>MAX PWR {this._maxLevel}</Text>
         <Text style={styles.detailText}>SCORE {this.state.score}</Text>
-        <TouchableWithoutFeedback
+        <TouchableOpacity
           style={styles.restartButton}
           onPress={this.restart.bind(this)}>
           <View><Text style={styles.restartText}>RESTART</Text></View>
-        </TouchableWithoutFeedback>
+        </TouchableOpacity>
       </View>
     );
   }
