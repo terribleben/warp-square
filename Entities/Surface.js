@@ -28,6 +28,12 @@ export default class Surface {
     this._mesh = new THREE.Mesh(this._makeShapeGeometry(), this._material);
     scene.add(this._mesh);
 
+    let screenGeom = new THREE.PlaneBufferGeometry(viewport.width, viewport.height);
+    this._screenMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 1 } );
+    this._screenMesh = new THREE.Mesh(screenGeom, this._screenMaterial);
+    this._screenMesh.position.z = 50;
+    scene.add(this._screenMesh);
+
     this._platforms = [];
     for (let ii = 0; ii < 4; ii++) {
       this._addPlatform();
@@ -39,6 +45,7 @@ export default class Surface {
       this._platforms[ii].destroy(scene);
     }
     scene.remove(this._mesh);
+    scene.remove(this._screenMesh);
     this._platforms = [];
   }
 
@@ -54,6 +61,12 @@ export default class Surface {
     return this._collidedPlatform;
   }
 
+  lightUp(colorHexStr) {
+    let hexColor = parseInt(colorHexStr.substring(1), 16)
+    this._screenMaterial.color.setHex(hexColor);
+    this._screenMaterial.opacity = 0.5;
+  }
+
   tick(dt) {
     this._updateShape();
     for (let ii = 0; ii < this._platforms.length; ii++) {
@@ -63,6 +76,13 @@ export default class Surface {
     if (this._platforms.length && !this._platforms[0].isAlive()) {
       this._platforms[0].destroy(this._scene);
       this._platforms.shift();
+    }
+    this._screenMesh.position.x = this._cameraXOffset;
+    if (this._screenMaterial.opacity > 0) {
+      this._screenMaterial.opacity *= 0.96;
+      if (this._screenMaterial.opacity < 0.01) {
+        this._screenMaterial.opacity = 0;
+      }
     }
   }
 
@@ -277,16 +297,5 @@ export default class Surface {
     gap *= this._viewport.width;
     radius *= this._viewport.width;
     return { gap, radius };
-
-    // radii get smaller with difficulty
-    /* let maxRadiusVariance = Math.max(0.02, 0.15 - (difficulty * 0.01));
-    let radius = this._viewport.width * (0.09 + Math.random() * maxRadiusVariance);
-
-    // gaps get larger with difficulty
-    // difficult: range 0.14-0.18. easy: range 0.03 - 0.07
-    // TODO: add variety
-    let baseGap = Math.min(0.14, 0.04 + (difficulty * 0.01));
-    let gap =  + (this._viewport.width * (baseGap + Math.random() * 0.04));
-    return { gap, radius }; */
   }
 };

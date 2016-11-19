@@ -161,6 +161,7 @@ export default class Game extends React.Component {
       this._makeBadParticles();
     } else {
       // begin game over sequence
+      this._surface.lightUp('#ff0000');
       this._player.explode();
     }
   }
@@ -191,6 +192,9 @@ export default class Game extends React.Component {
         this._difficulty += (level - this.state.level);
         this._player.setMaxVelMore(this._difficulty);
         this._maxLevel = level;
+        this._surface.lightUp('#ffffff');
+      } else {
+        this._surface.lightUp('#ff0000');
       }
       this.setState({
         level,
