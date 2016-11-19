@@ -22,6 +22,9 @@ export default class Menu extends React.Component {
           <Text style={styles.instructionsText}>
             SWIPE WITH THE SAME FINGER TO JUMP
           </Text>
+          <Text style={styles.instructionsText}>
+            REACH HIGHER PWR FOR MORE POINTS
+          </Text>
           <Text style={[styles.instructionsText, { color: '#ff0000' }]}>
             DO NOT CROSS THE DIMENSIONAL BARRIER
           </Text>
@@ -59,7 +62,7 @@ let styles = StyleSheet.create({
   instructionsText: {
     textAlign: 'center',
     color: '#dddddd',
-    fontSize: 16,
+    fontSize: 14,
     paddingVertical: 8,
     fontFamily: 'monofont',
   },

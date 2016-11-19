@@ -1,7 +1,7 @@
 {
-  "name": "dweller",
+  "name": "WARP SQUARE",
+  "description": "Guide the warp square across the bridge of sorrows",
   "version": "0.0.0",
-  "description": "Hello Exponent!",
   "author": "exponent.team@gmail.com",
   "private": true,
   "main": "main.js",

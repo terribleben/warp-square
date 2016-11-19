@@ -1,7 +1,7 @@
 {
-  "name": "dweller",
-  "description": "GAME JAM",
-  "slug": "dweller",
+  "name": "WARP SQUARE",
+  "description": "Guide the warp square across the bridge of sorrows",
+  "slug": "warp-square",
   "sdkVersion": "11.0.0",
   "version": "1.0.0",
   "orientation": "landscape",
