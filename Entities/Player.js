@@ -44,7 +44,7 @@ export default class Player {
   }
 
   setMaxVelMore(moreAmount) {
-    this._moreMaxVel = moreAmount * 0.08;
+    this._moreMaxVel = moreAmount * 0.06;
   }
 
   _getMaxVel() {
@@ -77,7 +77,7 @@ export default class Player {
     } else {
       this._xAccel = 0;
       if (!this._isJumping) {
-        this._xVel *= 0.93;
+        this._xVel *= 0.85;
       }
     }
     this._mesh.position.x += (this._xVel * dt);
