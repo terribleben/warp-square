@@ -190,12 +190,12 @@ export default class Game extends React.Component {
   }
 
   _setLevel(level) {
+    this._maxLevel = Math.max(this._maxLevel, level);
     if (level !== this.state.level) {
       if (level > this.state.level) {
         // difficulty will only increase, not go back down
         this._difficulty += (level - this.state.level);
         this._player.setMaxVelMore(this._difficulty);
-        this._maxLevel = level;
         this._surface.lightUp('#ffffff');
       } else {
         this._surface.lightUp('#ff0000');
