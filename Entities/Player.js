@@ -1,4 +1,8 @@
 
+import {
+  Platform,
+} from 'react-native';
+
 const THREE = require('three');
 
 const MAX_ACCEL = 20;
@@ -125,14 +129,14 @@ export default class Player {
   touch(touches, gesture) {
     if (touches && touches.length) {
       let firstTouch = touches[0];
-      if (!this._touchIdentifier && !this._isJumping) {
+      if (this._touchIdentifier === null && !this._isJumping) {
         this._touchIdentifier = firstTouch.identifier;
-        this._initialTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+        this._initialTouchPosition = this._touchLocation(firstTouch);
         this._isJumpAvailable = true;
         this._numTouchSteps = 0;
         this._touchYPositions = [this._initialTouchPosition.y];
-      } else if (firstTouch.identifier == this._touchIdentifier) {
-        let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+      } else if (firstTouch.identifier === this._touchIdentifier) {
+        let currentTouchPosition = this._touchLocation(firstTouch);
         this._numTouchSteps++;
         let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
         this._touchYPositions.push(currentTouchPosition.y);
@@ -145,8 +149,8 @@ export default class Player {
   release(touches, gesture) {
     if (touches && touches.length) {
       let firstTouch = touches[0];
-      if (this._touchIdentifier && firstTouch.identifier == this._touchIdentifier) {
-        let currentTouchPosition = { x: firstTouch.locationX, y: firstTouch.locationY };
+      if (this._touchIdentifier !== null && firstTouch.identifier === this._touchIdentifier) {
+        let currentTouchPosition = this._touchLocation(firstTouch);
         let deltaY = currentTouchPosition.y - this._initialTouchPosition.y;
         this._touchYPositions.push(currentTouchPosition.y);
         if (this._touchYPositions.length > 3) { this._touchYPositions.shift() };
@@ -174,6 +178,16 @@ export default class Player {
       this._isJumping = true;
       this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / this._getMaxVel())));
+    }
+  }
+
+  _touchLocation(touch) {
+    if (Platform.OS == 'ios') {
+      // ios uses locationX and locationY
+      return { x: touch.locationX, y: touch.locationY };
+    } else {
+      // android uses pageX and pageY
+      return { x: touch.pageX, y: touch.pageY };
     }
   }
 };
