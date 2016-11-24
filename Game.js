@@ -42,6 +42,7 @@ export default class Game extends React.Component {
     subscore: 0,
     hudTop: 0,
     overlayWidth: 0,
+    gameOverHeight: 0,
   };
 
   componentDidMount() {
@@ -77,7 +78,7 @@ export default class Game extends React.Component {
 
   _renderGameOver() {
     return (
-      <View style={[styles.gameOver, { width: this.state.overlayWidth }]}>
+      <View style={[styles.gameOver, { width: this.state.overlayWidth, height: this.state.gameOverHeight }]}>
         <TouchableOpacity
           style={styles.restartButton}
           onPress={this.restart.bind(this)}>
@@ -348,6 +349,7 @@ export default class Game extends React.Component {
       gameStatus: GAME_STARTED,
       hudTop: this._viewport.screenHeight - 56,
       overlayWidth: this._viewport.screenWidth,
+      gameOverHeight: this._viewport.screenHeight - 48,
       score: 0,
       subscore: 0,
     });
@@ -401,10 +403,11 @@ export default class Game extends React.Component {
 let styles = StyleSheet.create({
   gameOver: {
     position: 'absolute',
-    top: 72,
+    top: 48,
     left: 0,
-    height: 128,
     backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   gameOverText: {
     color: '#ff00ff',
