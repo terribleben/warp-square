@@ -5,16 +5,18 @@
   "sdkVersion": "15.0.0",
   "version": "1.1.0",
   "orientation": "landscape",
-  "primaryColor": "#cccccc",
+  "primaryColor": "#ff0000",
   "privacy": "public",
-  "icon": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
+  "icon": "./Assets/icon.png",
   "notification": {
-    "icon": "https://s3.amazonaws.com/exp-us-standard/placeholder-push-icon-blue-circle.png",
+    "icon": "./Assets/icon.png",
     "color": "#000000"
   },
   "loading": {
-    "icon": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
-    "hideExponentText": false
+    "icon": "./Assets/loading.png",
+    "backgroundColor": "#000000",
+    "hideExponentText": true,
+    "loadingIndicatorStyleExperimental": "light"
   },
   "packagerOpts": {
     "assetExts": ["ttf", "mp4"]
