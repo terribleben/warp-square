@@ -1,4 +1,4 @@
-import Exponent from 'exponent';
+import Expo from 'expo';
 import React from 'react';
 import {
   Alert,
@@ -56,7 +56,7 @@ class App extends React.Component {
         return (<Game style={styles.container} />);
       }
     } else {
-      return (<Exponent.Components.AppLoading />);
+      return (<Expo.AppLoading />);
     }
   }
 }
@@ -67,4 +67,4 @@ const styles = StyleSheet.create({
   },
 });
 
-Exponent.registerRootComponent(App);
+Expo.registerRootComponent(App);

@@ -2,20 +2,28 @@
   "name": "WARP SQUARE",
   "description": "Guide the warp square across the bridge of sorrows",
   "slug": "warp-square",
-  "sdkVersion": "11.0.0",
-  "version": "1.0.0",
+  "sdkVersion": "15.0.0",
+  "version": "1.1.0",
   "orientation": "landscape",
   "primaryColor": "#cccccc",
-  "iconUrl": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
+  "privacy": "public",
+  "icon": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
   "notification": {
-    "iconUrl": "https://s3.amazonaws.com/exp-us-standard/placeholder-push-icon-blue-circle.png",
+    "icon": "https://s3.amazonaws.com/exp-us-standard/placeholder-push-icon-blue-circle.png",
     "color": "#000000"
   },
   "loading": {
-    "iconUrl": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
+    "icon": "https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png",
     "hideExponentText": false
   },
   "packagerOpts": {
     "assetExts": ["ttf", "mp4"]
+  },
+  "ios": {
+    "bundleIdentifier": "com.terribleben.warpsquare",
+    "supportsTablet": false
+  },
+  "android": {
+    "package": "com.terribleben.warpsquare",
   }
 }

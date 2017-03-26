@@ -1,4 +1,4 @@
-import Exponent from 'exponent';
+import Expo from 'expo';
 import React from 'react';
 import {
   Dimensions,
@@ -17,7 +17,7 @@ import HUD from './HUD/HUD';
 import { SmallParticle, RadialParticle, BadParticle, BackgroundParticle } from './Entities/Particles';
 
 const THREE = require('three');
-const THREEView = Exponent.createTHREEViewClass(THREE);
+const THREEView = Expo.createTHREEViewClass(THREE);
 
 const GAME_FINISHED = 0;
 const GAME_STARTED = 1;
