@@ -169,6 +169,8 @@ export default class Game extends React.Component {
       // begin game over sequence
       this._surface.lightUp('#ff0000');
       this._player.explode();
+      SoundManager.playSoundAsync('pwrdown');
+      SoundManager.playSoundAsync('gameover');
     }
   }
 
@@ -307,6 +309,7 @@ export default class Game extends React.Component {
   }
 
   restart() {
+    SoundManager.playSoundAsync('select');
     if (this._player) {
       this._player.destroy(this._scene);
       this._player = null;

@@ -7,6 +7,7 @@ import {
 
 import Game from './Game';
 import Menu from './Menu';
+import SoundManager from './Assets/SoundManager';
 import cacheAssetsAsync from './Assets/cacheAssetsAsync';
 
 class App extends React.Component {
@@ -33,6 +34,8 @@ class App extends React.Component {
           land: require('./Assets/land.wav'),
           pwrup: require('./Assets/pwrup.wav'),
           pwrdown: require('./Assets/pwrdown.wav'),
+          gameover: require('./Assets/gameover-long-filter.wav'),
+          select: require('./Assets/select.wav'),
         },
       });
     } catch(e) {
@@ -47,6 +50,7 @@ class App extends React.Component {
   }
 
   _onPressStart = () => {
+    SoundManager.playSoundAsync('select');
     this.setState({ isShowingMenu: false });
   }
 
