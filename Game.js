@@ -64,6 +64,7 @@ export default class Game extends React.Component {
     let maybeScore = (this.state.gameStatus !== GAME_FINISHED) ? this._renderReactScore() : null;
     return (
       <View {...this.props}>
+        <Expo.KeepAwake />
         <THREEView
           style={this.props.style}
           {...panResponder.panHandlers}
