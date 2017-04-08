@@ -41,7 +41,10 @@ class SoundManager {
         rate = Math.min(32.0, Math.max(0.0, rate));
         await sound.setRateAsync(rate, false);
       }
-      await sound.setPositionAsync(0);
+      try {
+        // need to wrap in try/catch because sometimes seek fails for some reason.
+        await sound.setPositionAsync(0);
+      } catch (_) {}
       return sound.playAsync();
     }
     return;
