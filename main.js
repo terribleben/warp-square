@@ -28,6 +28,10 @@ class App extends React.Component {
         fonts: [
           {'monofont': require('./Assets/monofont.ttf')},
         ],
+        sounds: {
+          jump: require('./Assets/jump.wav'),
+          land: require('./Assets/land.wav'),
+        },
       });
     } catch(e) {
       console.warn(

@@ -2,6 +2,7 @@
 import {
   Platform,
 } from 'react-native';
+import SoundManager from '../Assets/SoundManager';
 
 const THREE = require('three');
 
@@ -107,6 +108,7 @@ export default class Player {
         this._isJumping = false;
         this._yVel = 0;
         this._stickToSurface(surfaceBelow);
+        SoundManager.playSoundAsync('land');
       }
     } else {
       this._stickToSurface(surfaceBelow);
@@ -178,6 +180,7 @@ export default class Player {
       this._isJumping = true;
       this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / this._getMaxVel())));
+      SoundManager.playSoundAsync('jump');
     }
   }
 

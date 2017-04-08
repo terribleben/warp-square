@@ -19,7 +19,7 @@
     "loadingIndicatorStyleExperimental": "light"
   },
   "packagerOpts": {
-    "assetExts": ["ttf", "mp4"]
+    "assetExts": ["ttf", "mp4", "wav"]
   },
   "ios": {
     "bundleIdentifier": "com.terribleben.warpsquare",
