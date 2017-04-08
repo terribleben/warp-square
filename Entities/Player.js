@@ -108,7 +108,7 @@ export default class Player {
         this._isJumping = false;
         this._yVel = 0;
         this._stickToSurface(surfaceBelow);
-        SoundManager.playSoundAsync('land');
+        SoundManager.playSoundAsync('land', { rate: 1.0, rateRandom: 0.2 });
       }
     } else {
       this._stickToSurface(surfaceBelow);
@@ -180,7 +180,7 @@ export default class Player {
       this._isJumping = true;
       this._isJumpAvailable = false;
       this._yVel = MAX_JUMP_VEL * Math.min(1.0, amount * (0.5 + 0.5 * (Math.abs(this._xVel) / this._getMaxVel())));
-      SoundManager.playSoundAsync('jump');
+      SoundManager.playSoundAsync('jump', { rate: 1.0, rateRandom: 0.1 });
     }
   }
 

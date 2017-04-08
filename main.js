@@ -31,6 +31,8 @@ class App extends React.Component {
         sounds: {
           jump: require('./Assets/jump.wav'),
           land: require('./Assets/land.wav'),
+          pwrup: require('./Assets/pwrup.wav'),
+          pwrdown: require('./Assets/pwrdown.wav'),
         },
       });
     } catch(e) {

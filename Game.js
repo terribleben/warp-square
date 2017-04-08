@@ -12,6 +12,7 @@ import {
 const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
 
 import Player from './Entities/Player';
+import SoundManager from './Assets/SoundManager';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
 import { SmallParticle, RadialParticle, BadParticle, BackgroundParticle } from './Entities/Particles';
@@ -198,8 +199,10 @@ export default class Game extends React.Component {
         this._difficulty += (level - this.state.level);
         this._player.setMaxVelMore(this._difficulty);
         this._surface.lightUp('#ffffff');
+        SoundManager.playSoundAsync('pwrup', { rate: Math.pow(2.0, this.state.level / 9.0) });
       } else {
         this._surface.lightUp('#ff0000');
+        SoundManager.playSoundAsync('pwrdown');
       }
       this.setState({
         level,
