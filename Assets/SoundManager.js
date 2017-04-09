@@ -1,6 +1,6 @@
 
 import Expo from 'expo';
-let { Audio } = Expo;
+let { Asset, Audio } = Expo;
 
 class SoundManager {
   constructor() {
@@ -17,11 +17,14 @@ class SoundManager {
   }
 
   loadSoundAsync = async (key, module) => {
+    if (typeof module === 'number') {
+      await Asset.fromModule(module).downloadAsync();
+    }
     const sound = new Audio.Sound({
       source: module,
     });
-    await sound.loadAsync();
     this._setSound(key, sound);
+    return sound.loadAsync();
   }
 
   /**
@@ -44,7 +47,9 @@ class SoundManager {
       try {
         // need to wrap in try/catch because sometimes seek fails for some reason.
         await sound.setPositionAsync(0);
-      } catch (_) {}
+      } catch (err) {
+        console.log('err seeking sound:', err.userInfo);
+      }
       return sound.playAsync();
     }
     return;
