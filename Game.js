@@ -3,6 +3,7 @@ import React from 'react';
 import {
   Dimensions,
   PanResponder,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -64,6 +65,7 @@ export default class Game extends React.Component {
     let maybeScore = (this.state.gameStatus !== GAME_FINISHED) ? this._renderReactScore() : null;
     return (
       <View {...this.props}>
+        <StatusBar hidden={true} animated={false} />
         <Expo.KeepAwake />
         <THREEView
           style={this.props.style}
