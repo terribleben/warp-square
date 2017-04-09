@@ -1,14 +1,17 @@
 
 import Expo from 'expo';
+import { Platform } from 'react-native';
 let { Asset, Audio } = Expo;
 
 class SoundManager {
   constructor() {
+    this._isRateSupported = true;
     this._sounds = {};
     this._setUpAsync();
   }
 
   _setUpAsync = async () => {
+    this._isRateSupported = !(Platform.OS === 'android' && Platform.Version < 23);
     await Audio.setIsEnabledAsync(true);
   }
   
@@ -35,7 +38,7 @@ class SoundManager {
   playSoundAsync = async (key, options) => {
     const sound = this._sounds[key];
     if (sound) {
-      if (options && options.rate) {
+      if (options && options.rate && this._isRateSupported) {
         let rate = options.rate;
         if (options.rateRandom) {
           let random = -options.rateRandom + (Math.random() * options.rateRandom * 2.0);
