@@ -141,6 +141,7 @@ export default class Game extends React.Component {
 
   onPlatformLanded(platform) {
     let newNumPlatformsLanded = this._numPlatformsLanded + 1;
+    SoundManager.playSoundAsync('morepwr', { rate: 0.8 + (0.2 * newNumPlatformsLanded) });
     this.setState({ subscore: this.state.subscore + (10 * (this.state.level + 1)) });
     if (newNumPlatformsLanded == 5) {
       this.setIsInverted(!this._isInverted, true);

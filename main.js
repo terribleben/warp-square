@@ -32,7 +32,8 @@ class App extends React.Component {
         sounds: {
           jump: require('./Assets/jump.wav'),
           land: require('./Assets/land.wav'),
-          pwrup: require('./Assets/pwrup.wav'),
+          morepwr: require('./Assets/morepwr.wav'),
+          pwrup: require('./Assets/pwrup-2.wav'),
           pwrdown: require('./Assets/pwrdown.wav'),
           gameover: require('./Assets/gameover-long-filter.wav'),
           select: require('./Assets/select.wav'),
