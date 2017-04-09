@@ -57,6 +57,30 @@ class SoundManager {
     }
     return;
   }
+
+  /**
+   *  options:
+   *  volume
+   *  restart - whether to stop and restart if already playing
+   */
+  loopSoundAsync = async (key, options) => {
+    const sound = this._sounds[key];
+    if (sound) {
+      let { isPlaying } = await sound.getStatusAsync();
+      if (isPlaying && options.restart) {
+        await sound.stopAsync();
+        try {
+          await sound.setPositionAsync(0);
+        } catch (_) {}
+      }
+      if (options && options.volume) {
+        await sound.setVolumeAsync(options.volume);
+      }
+      await sound.setIsLoopingAsync(true);
+      return sound.playAsync();
+    }
+    return;
+  }
 }
 
 export default new SoundManager();

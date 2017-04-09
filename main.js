@@ -37,6 +37,7 @@ class App extends React.Component {
           pwrdown: require('./Assets/pwrdown.wav'),
           gameover: require('./Assets/gameover-long-filter.wav'),
           select: require('./Assets/select.wav'),
+          music: require('./Assets/music.mp3'),
         },
       });
     } catch(e) {

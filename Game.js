@@ -317,6 +317,7 @@ export default class Game extends React.Component {
 
   restart() {
     SoundManager.playSoundAsync('select');
+    SoundManager.loopSoundAsync('music', { volume: 0.6 });
     if (this._player) {
       this._player.destroy(this._scene);
       this._player = null;
