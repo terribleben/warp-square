@@ -32,7 +32,8 @@ export default class Player {
 
     this._mesh = new THREE.Mesh(geometry, this._material);
     this._mesh.position.z = 10;
-    this._mesh.position.y = viewport.width * 0.2;
+    // hack to wait for THREE to load: start the player really high up in the air!!!
+    this._mesh.position.y = viewport.height * 4.0;
     scene.add(this._mesh);
   }
 
