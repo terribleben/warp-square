@@ -129,8 +129,11 @@ export default class Game extends React.Component {
     return this._difficulty;
   }
 
-  getLevelColor() {
-    let colorIdx = (this.state.level < LEVEL_COLORS.length) ? this.state.level : LEVEL_COLORS.length - 1;
+  getLevelColor(level) {
+    if (!Number.isInteger(level)) {
+      level = this.state.level;
+    }
+    let colorIdx = (level < LEVEL_COLORS.length) ? level : LEVEL_COLORS.length - 1;
     return LEVEL_COLORS[colorIdx];
   }
 
