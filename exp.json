@@ -2,7 +2,7 @@
   "name": "WARP SQUARE",
   "description": "Guide the warp square across the bridge of sorrows. github.com/terribleben/warp-square",
   "slug": "warp-square",
-  "sdkVersion": "15.0.0",
+  "sdkVersion": "17.0.0",
   "version": "1.2.0",
   "orientation": "landscape",
   "primaryColor": "#ff0000",

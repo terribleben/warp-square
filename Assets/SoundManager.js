@@ -23,11 +23,9 @@ class SoundManager {
     if (typeof module === 'number') {
       await Asset.fromModule(module).downloadAsync();
     }
-    const sound = new Audio.Sound({
-      source: module,
-    });
+    const { sound, status } = await Audio.Sound.create(module);
     this._setSound(key, sound);
-    return sound.loadAsync();
+    return sound;
   }
 
   /**
@@ -38,6 +36,7 @@ class SoundManager {
   playSoundAsync = async (key, options) => {
     const sound = this._sounds[key];
     if (sound) {
+      let statusToSet = {};
       if (options && options.rate && this._isRateSupported) {
         let rate = options.rate;
         if (options.rateRandom) {
@@ -45,15 +44,12 @@ class SoundManager {
           rate *= 1.0 + random;
         }
         rate = Math.min(32.0, Math.max(0.0, rate));
-        await sound.setRateAsync(rate, false);
+        statusToSet.rate = rate;
+        statusToSet.shouldCorrectPitch = false;
       }
-      try {
-        // need to wrap in try/catch because sometimes seek fails for some reason.
-        await sound.setPositionAsync(0);
-      } catch (err) {
-        console.log('err seeking sound:', err.userInfo);
-      }
-      return sound.playAsync();
+      statusToSet.positionMillis = 0;
+      statusToSet.shouldPlay = true;
+      return sound.setStatusAsync(statusToSet);
     }
     return;
   }
@@ -66,18 +62,18 @@ class SoundManager {
   loopSoundAsync = async (key, options) => {
     const sound = this._sounds[key];
     if (sound) {
+      let statusToSet = {};
       let { isPlaying } = await sound.getStatusAsync();
       if (isPlaying && options.restart) {
         await sound.stopAsync();
-        try {
-          await sound.setPositionAsync(0);
-        } catch (_) {}
       }
       if (options && options.volume) {
-        await sound.setVolumeAsync(options.volume);
+        statusToSet.volume = options.volume;
       }
-      await sound.setIsLoopingAsync(true);
-      return sound.playAsync();
+      statusToSet.positionMillis = 0;
+      statusToSet.shouldPlay = true;
+      statusToSet.isLooping = true;
+      return sound.setStatusAsync(statusToSet);
     }
     return;
   }
