@@ -1,4 +1,4 @@
-import Expo from 'expo';
+import { AppLoading } from 'expo';
 import React from 'react';
 import {
   Alert,
@@ -10,15 +10,22 @@ import Menu from './Menu';
 import SoundManager from './Assets/SoundManager';
 import cacheAssetsAsync from './Assets/cacheAssetsAsync';
 
-class App extends React.Component {
+export default class App extends React.Component {
   state = {
     loaded: false,
     isShowingMenu: true,
   }
 
   componentWillMount() {
-    // THREE warns about unavailable WebGL extensions.
-    console.disableYellowBox = true;
+    const oldWarn = console.warn;
+    console.warn = (str) => {
+      if (str.indexOf('THREE') !== -1) {
+        // don't provide stack traces for warnspew from THREE
+        console.log('Warning:', str);
+        return;
+      }
+      return oldWarn.apply(console, [str]);
+    }
     this.load();
   }
 
@@ -79,4 +86,3 @@ const styles = StyleSheet.create({
   },
 });
 
-Expo.registerRootComponent(App);

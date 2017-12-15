@@ -3,6 +3,7 @@ import React from 'react';
 import {
   Dimensions,
   PanResponder,
+  PixelRatio,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,19 +11,17 @@ import {
   View,
 } from 'react-native';
 
-const RCTDeviceEventEmitter = require('RCTDeviceEventEmitter');
-
+import * as THREE from 'three';
+import ExpoTHREE from 'expo-three';
 import Player from './Entities/Player';
 import SoundManager from './Assets/SoundManager';
 import Surface from './Entities/Surface';
 import HUD from './HUD/HUD';
 import { SmallParticle, RadialParticle, BadParticle, BackgroundParticle } from './Entities/Particles';
 
-const THREE = require('three');
-const THREEView = Expo.createTHREEViewClass(THREE);
+const SCREEN_SCALE = PixelRatio.get();
 
-const GAME_FINISHED = 0;
-const GAME_STARTED = 1;
+const GAME_LOADING = 0, GAME_STARTED = 1, GAME_FINISHED = 2;
 const LEVEL_COLORS = [
   '#ee0000',
   '#eeaa00',
@@ -38,7 +37,7 @@ const LEVEL_COLORS = [
 
 export default class Game extends React.Component {
   state = {
-    gameStatus: GAME_STARTED,
+    gameStatus: GAME_LOADING,
     level: 0,
     score: 0,
     subscore: 0,
@@ -46,11 +45,6 @@ export default class Game extends React.Component {
     overlayWidth: 0,
     gameOverHeight: 0,
   };
-
-  componentDidMount() {
-    RCTDeviceEventEmitter.addListener('didUpdateDimensions', this.restart.bind(this));
-    this.restart();
-  }
 
   render() {
     const panResponder = PanResponder.create({
@@ -67,12 +61,10 @@ export default class Game extends React.Component {
       <View {...this.props}>
         <StatusBar hidden={true} animated={false} />
         <Expo.KeepAwake />
-        <THREEView
+        <Expo.GLView
           style={this.props.style}
           {...panResponder.panHandlers}
-          scene={this._scene}
-          camera={this._camera}
-          tick={this._tick.bind(this)}
+          onContextCreate={this._onGLContextCreate}
         />
         {otherStuff}
         {maybeScore}
@@ -85,14 +77,14 @@ export default class Game extends React.Component {
       <View style={[styles.gameOver, { width: this.state.overlayWidth, height: this.state.gameOverHeight }]}>
         <TouchableOpacity
           style={styles.restartButton}
-          onPress={this.restart.bind(this)}>
+          onPress={this._restart}>
           <View><Text style={styles.gameOverText}>GAME OVER</Text></View>
         </TouchableOpacity>
         <Text style={styles.detailText}>MAX PWR {this._maxLevel}</Text>
         <Text style={styles.detailText}>SCORE {this.state.score}</Text>
         <TouchableOpacity
           style={styles.restartButton}
-          onPress={this.restart.bind(this)}>
+          onPress={this._restart}>
           <View><Text style={styles.restartText}>RESTART</Text></View>
         </TouchableOpacity>
       </View>
@@ -100,6 +92,9 @@ export default class Game extends React.Component {
   }
 
   _renderReactHUD() {
+    if (this.state.gameStatus == GAME_LOADING) {
+      return;
+    }
     return (
       <View style={[styles.hud, { top: this.state.hudTop }]}>
         <Text style={[styles.levelText, { color: this.getLevelColor() }]}>
@@ -247,7 +242,26 @@ export default class Game extends React.Component {
     }
   }
 
-  _tick(dt) {
+  _onGLContextCreate = async (glContext) => {
+    this._glContext = glContext;
+    this._restart();
+    
+    let lastFrameTime;
+    const render = () => {
+      requestAnimationFrame(render);
+      const now = 0.001 * global.nativePerformanceNow();
+      const dt = typeof lastFrameTime !== "undefined" ? now - lastFrameTime : 0.16666;
+
+      this._tick(dt);
+      this._renderer.render(this._scene, this._camera);
+
+      this._glContext.endFrameEXP();
+      lastFrameTime = now;
+    }
+    render();
+  }
+
+  _tick = (dt) => {
     this._updateCamera();
     if (this.state.gameStatus === GAME_STARTED) {
       this._player.tick(dt);
@@ -315,9 +329,48 @@ export default class Game extends React.Component {
     }
   }
 
-  restart() {
+  _restart = () => {
     SoundManager.playSoundAsync('select');
     SoundManager.loopSoundAsync('music', { volume: 0.6 });
+    this._destroy();
+    const gl = this._glContext;
+    this._scene = new THREE.Scene();
+    this._restartCamera(gl);
+    this._renderer = ExpoTHREE.createRenderer({ gl });
+    this._renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
+    this._isInverted = false;
+    this._numPlatformsLanded = 0;
+    this._difficulty = 0;
+
+    const geom = new THREE.PlaneBufferGeometry(this._viewport.width, this._viewport.height);
+    const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x0 });
+    this._bgMesh = new THREE.Mesh(geom, bgMaterial);
+    this._bgMesh.position.z = -99;
+    this._scene.add(this._bgMesh);
+ 
+    this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
+    this._player = new Player(this._scene, this._viewport, this._surface);
+    this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
+    this._particles = {};
+    this._bgParticles = [];
+    this._nextParticleId = 0;
+    this._maxLevel = 0;
+    this._makeBgParticles();
+    this._setLevel(0);
+    this.setState({
+      gameStatus: GAME_STARTED,
+      hudTop: (this._viewport.screenHeight / SCREEN_SCALE) - 56,
+      overlayWidth: this._viewport.screenWidth / SCREEN_SCALE,
+      gameOverHeight: (this._viewport.screenHeight / SCREEN_SCALE) - 48,
+      score: 0,
+      subscore: 0,
+    });
+  }
+
+  _destroy = () => {
+    if (this._bgMesh) {
+      this._scene.remove(this._bgMesh);
+    }
     if (this._player) {
       this._player.destroy(this._scene);
       this._player = null;
@@ -344,34 +397,12 @@ export default class Game extends React.Component {
       }
       this._bgParticles = null;
     }
-    this._restartCamera();
-
-    this._scene = new THREE.Scene();
-    this._isInverted = false;
-    this._numPlatformsLanded = 0;
-    this._difficulty = 0;
-    this._surface = new Surface(this.getGame.bind(this), this._scene, this._viewport);
-    this._player = new Player(this._scene, this._viewport, this._surface);
-    this._hud = new HUD(this.getGame.bind(this), this._scene, this._viewport);
-    this._particles = {};
-    this._bgParticles = [];
-    this._nextParticleId = 0;
-    this._maxLevel = 0;
-    this._makeBgParticles();
-    this._setLevel(0);
-    this.setState({
-      gameStatus: GAME_STARTED,
-      hudTop: this._viewport.screenHeight - 56,
-      overlayWidth: this._viewport.screenWidth,
-      gameOverHeight: this._viewport.screenHeight - 48,
-      score: 0,
-      subscore: 0,
-    });
   }
 
-  _restartCamera() {
+  _restartCamera = (glContext) => {
     let width, height;
-    let { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const screenWidth = glContext.drawingBufferWidth,
+          screenHeight = glContext.drawingBufferHeight;
     console.log('setting up camera with screen width/height:', screenWidth, screenHeight)
     if (screenWidth > screenHeight) {
       width = 4;
@@ -410,6 +441,7 @@ export default class Game extends React.Component {
       for (let ii = 0, nn = this._bgParticles.length; ii < nn; ii++) {
         this._bgParticles[ii].cameraDidUpdate(playerPos);
       }
+      this._bgMesh.position.x = playerPos;
     }
   }
 };

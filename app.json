@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "WARP SQUARE",
+    "description": "Guide the warp square across the bridge of sorrows.",
+    "githubUrl": "https://github.com/terribleben/warp-square",
+    "slug": "warp-square",
+    "sdkVersion": "24.0.0",
+    "version": "1.4.0",
+    "orientation": "landscape",
+    "primaryColor": "#ff0000",
+    "privacy": "public",
+    "icon": "./Assets/icon.png",
+    "splash": {
+      "image": "./Assets/loading.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "ios": {
+      "bundleIdentifier": "com.terribleben.warpsquare",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.terribleben.warpsquare",
+    }
+  }
+}
