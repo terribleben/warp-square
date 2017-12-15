@@ -36,7 +36,7 @@ class SoundManager {
   playSoundAsync = async (key, options) => {
     const sound = this._sounds[key];
     if (sound) {
-      let statusToSet = {};
+      // let statusToSet = {};
       if (options && options.rate && this._isRateSupported) {
         let rate = options.rate;
         if (options.rateRandom) {
@@ -44,12 +44,10 @@ class SoundManager {
           rate *= 1.0 + random;
         }
         rate = Math.min(32.0, Math.max(0.0, rate));
-        statusToSet.rate = rate;
-        statusToSet.shouldCorrectPitch = false;
+        // statusToSet.rate = rate;
+        // statusToSet.shouldCorrectPitch = false;
       }
-      statusToSet.positionMillis = 0;
-      statusToSet.shouldPlay = true;
-      return sound.setStatusAsync(statusToSet);
+      return sound.replayAsync();
     }
     return;
   }
