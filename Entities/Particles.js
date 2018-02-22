@@ -62,8 +62,7 @@ class RadialParticle {
       0                 // aRotation
     );
 
-    let path = new THREE.Path(curve.getPoints(32));
-    let geometry = path.createPointsGeometry(32);
+    let geometry = new THREE.Geometry().setFromPoints(curve.getPoints(32));
     this._material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 3, transparent: true });
 
     // Create the final Object3d to add to the scene
@@ -112,8 +111,7 @@ class BadParticle {
       0                 // aRotation
     );
 
-    let path = new THREE.Path(curve.getPoints(11));
-    let geometry = path.createPointsGeometry(11);
+    let geometry = new THREE.Geometry().setFromPoints(curve.getPoints(11));
     this._material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3, transparent: true });
 
     // Create the final Object3d to add to the scene

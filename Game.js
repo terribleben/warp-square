@@ -46,6 +46,10 @@ export default class Game extends React.Component {
     gameOverHeight: 0,
   };
 
+  componentWillMount() {
+    THREE.suppressExpoWarnings(true);
+  }
+
   render() {
     const panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
