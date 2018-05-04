@@ -43,6 +43,7 @@ let styles = StyleSheet.create({
   container: {
     backgroundColor: '#000000',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   startButton: {
     padding: 16,
